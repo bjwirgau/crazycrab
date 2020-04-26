@@ -1,0 +1,79 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button color="secondary"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">{{ isLoading ? 'Loading...' : product.name }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner></ion-spinner>
+  </div>
+  <div *ngIf="!isLoading && product != null">
+    <form #form="ngForm" (ngSubmit)="addItemToCart(form)">
+      <ion-grid class="ion-no-padding">
+        <!-- Product Image -->
+        <ion-row>
+          <ion-col>
+            <ion-img [src]="product.imageUrl"></ion-img>
+          </ion-col>
+        </ion-row>
+
+        <ion-input type="hidden" [value]="product" name="product" [(ngModel)]="product"></ion-input>
+
+        <!-- Product Options -->
+        <ion-row *ngFor="let option of productOptions">
+          <ion-col size="12" *ngIf="option.key !== 'price'">
+            <ion-item>
+              <ion-label>{{ option.label }}</ion-label>
+              <ion-select placeholder="Select One" [id]="option.id" [ngModel]="option.id" [name]="option.id" required #prepCtrl="ngModel" interface="popover" (ionChange)="addProductOption($event)">
+                <ion-select-option [value]="value.key" *ngFor="let value of option.values | keyvalue">{{ value.value.value }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <!-- Product Quantity -->
+        <ion-row class="ion-justify-content-center ion-align-items-center ion-padding" style="height: 100%">
+          <ion-col size="5">
+            Quantity
+          </ion-col>
+          <ion-col size="2">
+            <ion-item lines="none">
+              <ion-icon name="remove-circle" color="tertiary" (click)="decrementQty()" size="large"></ion-icon>
+            </ion-item>
+          </ion-col>
+          <ion-col size="3">
+            <ion-item lines="none">
+              <ion-input type="number" min="1" name="quantity" [value]="productQuantity" [(ngModel)]="productQuantity"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="2">
+            <ion-item lines="none">
+              <ion-icon name="add-circle" color="primary" (click)="incrementQty()" size="large"></ion-icon>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <!-- Product Price -->
+        <ion-row class="ion-justify-content-center ion-align-items-center ion-padding" style="height: 100%">
+          <ion-col size="8">
+            Price
+          </ion-col>
+          <ion-col size="4">
+            <ion-item lines="none">
+              <div>$</div>
+              <ion-input type="text" readonly name="currentPrice" [value]="product.price" [(ngModel)]="currentPrice"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <!-- Add to Cart -->
+        <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
+          <ion-col size="10" class="ion-text-center">
+            <ion-button type="submit" [disabled]="!form.valid" color="primary" expand="block">Add to Cart</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </form>
+  </div>
+</ion-content>

@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="back()" *ngIf="menuService.menuHistory.length > 1">
+        <ion-icon name="arrow-back-outline" color="secondary" size="large"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Menu</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="main-background">
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <div *ngIf="isLoading" class="ion-text-center">
+          <ion-spinner></ion-spinner>
+        </div>
+        <ion-list *ngIf="!isLoading && menuItems.length > 0">
+          <ion-item *ngFor="let menuItem of menuItems" (click)="updateMenu(menuItem.id, menuItem.type)" detail>
+            <ion-thumbnail slot="start">
+              <ion-img [src]="menuItem.imageUrl"></ion-img>
+            </ion-thumbnail>
+            <ion-label class="ion-text-right ion-padding-right" style="font-family:'Open Sans';font-weight:900;">{{ menuItem.title }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
