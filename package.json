@@ -29,6 +29,7 @@
     "rxjs": "^6.5.5",
     "rxjs-compat": "^6.5.5",
     "tslib": "^1.9.0",
+    "webpack-dev-server": "^3.10.3",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
@@ -37,6 +38,8 @@
     "@angular/compiler": "~8.2.14",
     "@angular/compiler-cli": "~8.2.14",
     "@angular/language-service": "~8.2.14",
+    "@babel/compat-data": "~7.8.0",
+    "@capacitor/cli": "2.0.1",
     "@ionic/angular-toolkit": "^2.1.1",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
