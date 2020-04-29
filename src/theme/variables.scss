@@ -74,6 +74,11 @@
   // --ion-item-background: transparent !important;
 
   $list-background-color: transparent;
+  
+  ion-item,
+  ion-col {
+    font-size: .8rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -222,13 +227,5 @@
 
     $item-md-sliding-content-background: transparent;
   }
-
-  // ion-title.title-large {
-  //   --color: white;
-  // }
 }
-
-// ion-content {
-//   --background: url('../assets/woodbackground.jpg');
-// }
 

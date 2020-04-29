@@ -1,4 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import { LocationService } from './location.service';
+import { StoreLocation } from './location.model';
 
 @Component({
   selector: 'app-location',
@@ -8,11 +10,24 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2 } fr
 export class LocationPage implements OnInit, AfterViewInit {
   @ViewChild('map', {static: false}) mapElementRef: ElementRef;
 
+  loading: boolean = false;
+  storeLocations: StoreLocation[];
+
   constructor(
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private locationService: LocationService
   ) { }
 
   ngOnInit() {
+    this.loading = true;
+    this.locationService.fetchLocations().subscribe(() => {
+      this.loading = false;
+    });
+
+    this.locationService.storeLocations.subscribe(locations => {
+      console.log("Store Locations", locations);
+      this.storeLocations = locations;
+    });
   }
   
   ngAfterViewInit(){
