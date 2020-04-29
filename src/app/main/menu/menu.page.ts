@@ -38,6 +38,10 @@ export class MenuPage implements OnInit, OnDestroy {
     }
   }
 
+  get menuHistory() {
+    return this.menuService.menuHistory;
+  }
+
   updateMenu(category: string, type: string) {
     switch (type) {
       case 'category':
