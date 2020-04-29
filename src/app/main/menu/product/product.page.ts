@@ -44,7 +44,7 @@ export class ProductPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe(paramMap => {
       if (!paramMap.has('productId')) {
-        this.router.navigate(['/main/tabs/newmenu/']);
+        this.router.navigate(['/main/tabs/menu/']);
         return;
       }
 

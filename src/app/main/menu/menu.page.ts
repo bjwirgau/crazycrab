@@ -53,7 +53,7 @@ export class MenuPage implements OnInit, OnDestroy {
         });
         break;
       case 'product':
-        this.router.navigateByUrl('/main/tabs/newmenu/'+category);
+        this.router.navigateByUrl('/main/tabs/menu/'+category);
         break;
     }
   }
