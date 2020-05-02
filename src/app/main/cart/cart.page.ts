@@ -9,7 +9,7 @@ import { QuoteitemService } from './quoteitem.service';
 import { QuoteItem } from './quoteitem.model';
 import { QuoteService } from './quote.service';
 import { Quote } from './quote.model';
-import { flatMap, tap } from 'rxjs/operators';
+import { flatMap, tap, take, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cart',
@@ -18,7 +18,7 @@ import { flatMap, tap } from 'rxjs/operators';
 })
 export class CartPage implements OnInit {
   quoteItems: QuoteItem[];
-  quote: Quote;
+  quote: Quote[];
   private cartSub: Subscription;
   private taxSub: Subscription;
   isLoading = false;
@@ -51,16 +51,20 @@ export class CartPage implements OnInit {
     this.isLoading = true;
     this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
       this.quoteItems = quoteItems;
+    });
+    this.quoteService.fetchQuote().subscribe(quote => {
+      this.quote = quote;
       this.quoteService.calculateSubtotal();
-      this.quoteService.calculateTax().subscribe(taxAmount => {
-      console.log('Tax Amount',taxAmount);
-      this.quoteService.taxAmount.subscribe(taxAmount => {
-        this.taxAmount = taxAmount;
-        this.grandTotal = this.taxAmount + this.subTotal;
+      this.quoteService.calculateTax()
+      .subscribe(taxRate => {
+        console.log('Tax Amount',taxRate);
+        this.quoteService.taxAmount.subscribe(taxAmount => {
+          this.taxAmount = taxAmount;          
+          this.grandTotal = this.taxAmount + this.subTotal;
+          this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount).subscribe();
+        });
       });
-    });
-    });
-    
+    })
   }
 
   onRemoveQuoteItem(quoteItem: string){
@@ -85,7 +89,8 @@ export class CartPage implements OnInit {
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
     this.quoteItemService.deleteQuoteItem(id).subscribe(() => {
-      this.quoteService.calculateTax().subscribe(taxAmount => {
+      this.quoteService.calculateTax()
+      .subscribe(taxAmount => {
         console.log('Tax Amount',taxAmount);
         this.quoteService.taxAmount.subscribe(taxAmount => {
           this.taxAmount = taxAmount;

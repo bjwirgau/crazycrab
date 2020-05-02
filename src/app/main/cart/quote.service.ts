@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { HttpClient } from '@angular/common/http';
+import { HTTP } from '@ionic-native/http/ngx';
 
 import { environment } from 'src/environments/environment';
 import { QuoteitemService } from './quoteitem.service';
@@ -22,7 +23,11 @@ interface QuoteData {
   id: string,
   userId: string,
   createdAt: Date,
-  updatedAt: Date
+  updatedAt: Date,
+  taxRate: number,
+  taxAmount: number,
+  subTotal: number,
+  grandTotal: number,
 }
 
 @Injectable({
@@ -34,10 +39,11 @@ export class QuoteService {
   private _subtotal: number = 0;
   private _quote = new BehaviorSubject<Quote>(null);
   private _taxAmount = new BehaviorSubject<number>(0);
-  private _grandTotal: number;
+  private _grandTotal: number = 0;
 
   constructor(
     private httpClient: HttpClient,
+    private corsHttpClient: HTTP,
     private quoteItemService: QuoteitemService,
     private accountService: AccountService
   ) { }
@@ -54,7 +60,7 @@ export class QuoteService {
     return this._taxAmount.asObservable();
   }
 
-  createQuote(){
+  createQuote(totalProductPrice: number){
     let quote: Quote;
     let createdAt: Date; 
     let updatedAt: Date;
@@ -64,13 +70,13 @@ export class QuoteService {
       Math.random().toString(),
       '',
       createdAt,
-      updatedAt
+      updatedAt,
+      0,
+      0,
+      totalProductPrice,
+      this._grandTotal
       // quoteItemIds,
-      // 0.06,
-      // this._taxAmount,
       // 'takeout',
-      // this._subtotal,
-      // this._grandTotal
     );
 
     return this.accountService.userId.pipe(
@@ -123,7 +129,7 @@ export class QuoteService {
         .pipe(
           map(resData => {
             console.log("Result", resData);
-            const quote = [];
+            const quote: Quote[] = [];
 
             for(const key in resData){
               if(resData.hasOwnProperty(key)){
@@ -131,7 +137,11 @@ export class QuoteService {
                   key,
                   resData[key].userId,
                   resData[key].createdAt,
-                  resData[key].updatedAt
+                  resData[key].updatedAt,
+                  resData[key].taxRate,
+                  resData[key].taxAmount,
+                  resData[key].subTotal,
+                  resData[key].grandTotal
                 ))
               }
             }
@@ -146,18 +156,31 @@ export class QuoteService {
     )
   }
 
-  updateQuote(){
+  updateQuote(
+    totalProductPrice: number, 
+    taxRate: number, 
+    taxAmount: number
+  ){  
     let updatedQuote: Quote;
     return this.quote.pipe(
       take(1),
       switchMap(quote => {
+        let subtotal = quote.subTotal + totalProductPrice;
+        let grandtotal = quote.subTotal + taxAmount;
+
         updatedQuote = new Quote(
           quote.id,
           quote.userId,
           quote.createdAt,
-          new Date()
+          new Date(),
+          taxRate,
+          taxAmount,
+          subtotal,
+          grandtotal
         );
        
+        console.log("Updating quote", `${environment.firebase.databaseURL}quote/${quote.id}.json`);
+        console.log("Updated Quote", updatedQuote);
         return this.httpClient.put(
           `${environment.firebase.databaseURL}quote/${quote.id}.json`,
           {...updatedQuote, id:null}
@@ -184,9 +207,10 @@ export class QuoteService {
 
   calculateTax(zip: string = '48033'){
     let taxRate: TaxRate;
-    console.log("Getting tax rate from zip tax...")
+    console.log("Getting tax rate from zip tax...");
+    
     return this.httpClient
-      .get<TaxData>(`https://api.zip-tax.com/request/v40?key=${environment.ziptax.key}&postalcode=${zip}`).pipe(
+      .get<TaxData>(`http://api.zip-tax.com/request/v40?key=${environment.ziptax.key}&postalcode=${zip}`).pipe(
         map(result => {
           taxRate = new TaxRate(
             Math.random().toString(),
@@ -201,5 +225,6 @@ export class QuoteService {
           this._taxAmount.next(taxRate.rate.taxSales*this._subtotal);
         })
       );
+
   }
 }

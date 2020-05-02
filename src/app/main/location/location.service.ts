@@ -6,12 +6,14 @@ import { StoreLocation } from './location.model';
 import { BehaviorSubject } from 'rxjs';
 
 interface StoreLocationData {
+  id: string,
   title: string,
   street: string,
   city: string,
   state: string,
   zip: string,
-  hours: {}
+  hours: {},
+  open: boolean
 }
 
 @Injectable({
@@ -37,12 +39,14 @@ export class LocationService {
         for (const key in resData){
           if (resData.hasOwnProperty(key)){
             storeLocations.push(new StoreLocation(
+              key,
               resData[key].title,
               resData[key].street,
               resData[key].city,
               resData[key].state,
               resData[key].zip,
-              resData[key].hours
+              resData[key].hours,
+              resData[key].open
             ))
           }
         }

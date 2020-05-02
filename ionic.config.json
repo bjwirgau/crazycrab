@@ -1,7 +1,8 @@
 {
   "name": "crazycrab",
   "integrations": {
-    "capacitor": {}
+    "capacitor": {},
+    "cordova": {}
   },
   "type": "angular"
 }

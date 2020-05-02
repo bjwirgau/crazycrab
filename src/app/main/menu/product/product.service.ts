@@ -60,7 +60,9 @@ export class ProductService {
     this.quoteService.fetchQuote().subscribe(
       quote => {
         if (quote.length === 0){
-          this.quoteService.createQuote().subscribe(
+          this.quoteService.createQuote(
+            totalProductPrice
+          ).subscribe(
             quote => {
               console.log("New Quote", quote);
               this.quoteItemService.saveQuoteItem(
@@ -74,7 +76,11 @@ export class ProductService {
             }
           )
         } else {
-          this.quoteService.updateQuote().subscribe(
+          this.quoteService.updateQuote(
+            totalProductPrice,
+            0,
+            0
+          ).subscribe(
             quote => {
               this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
                 console.log("Retrieving quote items", quoteItems);

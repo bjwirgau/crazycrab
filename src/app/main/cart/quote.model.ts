@@ -3,13 +3,12 @@ export class Quote {
         public id: string,
         public userId: string,
         public createdAt: Date,
-        public updatedAt: Date
+        public updatedAt: Date,
+        public taxRate: number,
+        public taxAmount: number,
+        public subTotal: number,
+        public grandTotal: number,
         // public quoteItems: string[],
-        // public subTotal: number,
-        // public grandTotal: number,
-
-        // public taxRate: number,
-        // public taxAmount: number,
         // public deliveryMethod: string,
     ){}
 }

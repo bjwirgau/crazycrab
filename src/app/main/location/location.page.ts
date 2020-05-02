@@ -11,6 +11,7 @@ export class LocationPage implements OnInit, AfterViewInit {
   @ViewChild('map', {static: false}) mapElementRef: ElementRef;
 
   loading: boolean = false;
+  expanded: boolean = false;
   storeLocations: StoreLocation[];
 
   constructor(
@@ -28,6 +29,10 @@ export class LocationPage implements OnInit, AfterViewInit {
       console.log("Store Locations", locations);
       this.storeLocations = locations;
     });
+  }
+
+  toggleCollapsed(){
+    
   }
   
   ngAfterViewInit(){
