@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 
 import { Subscription } from 'rxjs';
 
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, IonItemSliding } from '@ionic/angular';
 
 import { QuoteitemService } from './quoteitem.service';
 import { QuoteItem } from './quoteitem.model';
 import { QuoteService } from './quote.service';
 import { Quote } from './quote.model';
 import { flatMap, tap, take, map } from 'rxjs/operators';
+import { ProductService } from '../menu/product/product.service';
 
 @Component({
   selector: 'app-cart',
@@ -32,7 +33,8 @@ export class CartPage implements OnInit {
     private quoteItemService: QuoteitemService,
     private quoteService: QuoteService,
     private loadingCtrl: LoadingController,
-    private router: Router
+    private router: Router,
+    private productService: ProductService
   ) { }
 
   ngOnInit() {
@@ -55,29 +57,53 @@ export class CartPage implements OnInit {
     this.quoteService.fetchQuote().subscribe(quote => {
       this.quote = quote;
       this.quoteService.calculateSubtotal();
-      this.quoteService.calculateTax()
-      .subscribe(taxRate => {
-        console.log('Tax Amount',taxRate);
-        this.quoteService.taxAmount.subscribe(taxAmount => {
-          this.taxAmount = taxAmount;          
-          this.grandTotal = this.taxAmount + this.subTotal;
-          this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount).subscribe();
-        });
-      });
+      // this.quoteService.calculateTax()
+      // .subscribe(taxRate => {
+      //   this.quoteService.taxAmount.subscribe(taxAmount => {
+      //     this.taxAmount = taxAmount;          
+      //     this.grandTotal = this.taxAmount + this.subTotal;
+      //     this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
+      //   });
+      // });
+      this.taxAmount = 1;
+      this.grandTotal = this.taxAmount + this.subTotal;
     })
   }
 
-  onRemoveQuoteItem(quoteItem: string){
+  onRemoveQuoteItem(quoteItemId: string, removeBookingEl: IonItemSliding){
     this.loadingCtrl.create({ message: 'Removing item...'}).then(loadingEl => {
       loadingEl.present();
-      this.quoteItemService.removeQuoteItem(quoteItem).subscribe(() => {
+      this.quoteItemService.removeQuoteItem(quoteItemId).subscribe(() => {
         loadingEl.dismiss();
       });
     })
   }
 
+  addQuantity(quoteItem: QuoteItem) {
+    console.log("Adding Item", quoteItem);
+    this.productService.addItemToCart(
+      quoteItem.itemId,
+      quoteItem.itemName,
+      quoteItem.itemPrice,
+      quoteItem.totalItemPrice,
+      1,
+      quoteItem.itemOptions,
+      quoteItem.imageUrl
+    )
+  }
+
+  decrementQuantity(quoteItem: QuoteItem) {
+    if (quoteItem.itemQuantity > 1){
+      console.log("Removing Single Item", quoteItem);
+      this.productService.decrementItemFromCart(quoteItem)
+    }
+  }
+
   onDeliveryButtonClick() {
-    this.router.navigateByUrl('/main/tabs/cart/delivery');
+    let deliveryMethod = document.querySelector('#delivery-method').nodeValue;
+    console.log(deliveryMethod);
+    // this.quoteService.updateQuote(this.quote[0].subTotal, this.quote[0].taxRate, this.quote[0].taxAmount, )
+    this.router.navigateByUrl('/main/tabs/cart/payment');
   }
 
   ngOnDestroy() {
@@ -88,10 +114,9 @@ export class CartPage implements OnInit {
 
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
-    this.quoteItemService.deleteQuoteItem(id).subscribe(() => {
+    this.quoteItemService.removeQuoteItem(id).subscribe(() => {
       this.quoteService.calculateTax()
       .subscribe(taxAmount => {
-        console.log('Tax Amount',taxAmount);
         this.quoteService.taxAmount.subscribe(taxAmount => {
           this.taxAmount = taxAmount;
           this.isTaxLoading = false;

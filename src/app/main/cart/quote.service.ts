@@ -7,7 +7,6 @@ import { environment } from 'src/environments/environment';
 import { QuoteitemService } from './quoteitem.service';
 import { AccountService } from '../account/account.service';
 import { take, switchMap, tap, map } from 'rxjs/operators';
-import { QuoteItem } from './quoteitem.model';
 import { Quote } from './quote.model'
 import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { TaxRate } from './taxrate.model';
@@ -28,6 +27,7 @@ interface QuoteData {
   taxAmount: number,
   subTotal: number,
   grandTotal: number,
+  deliveryMethod: string
 }
 
 @Injectable({
@@ -74,9 +74,8 @@ export class QuoteService {
       0,
       0,
       totalProductPrice,
-      this._grandTotal
-      // quoteItemIds,
-      // 'takeout',
+      totalProductPrice,
+      '',
     );
 
     return this.accountService.userId.pipe(
@@ -99,9 +98,6 @@ export class QuoteService {
         // }
 
         quote.userId = userId;
-        
-        console.log("Saving quote to database.");
-        console.log(quote);
 
         return this.httpClient.post<{ id: string }>(
           `${environment.firebase.databaseURL}quote.json`, 
@@ -109,7 +105,6 @@ export class QuoteService {
         );
       }),
       tap(resData => {
-        console.log(resData);
         quote.id = resData.id;
         this._quote.next(quote);
       })
@@ -128,7 +123,6 @@ export class QuoteService {
         .get<{[key: string]: QuoteData}>(`${environment.firebase.databaseURL}quote.json?orderBy="userId"&equalTo="${userId}"`)
         .pipe(
           map(resData => {
-            console.log("Result", resData);
             const quote: Quote[] = [];
 
             for(const key in resData){
@@ -141,7 +135,8 @@ export class QuoteService {
                   resData[key].taxRate,
                   resData[key].taxAmount,
                   resData[key].subTotal,
-                  resData[key].grandTotal
+                  resData[key].grandTotal,
+                  resData[key].deliveryMethod
                 ))
               }
             }
@@ -159,14 +154,15 @@ export class QuoteService {
   updateQuote(
     totalProductPrice: number, 
     taxRate: number, 
-    taxAmount: number
+    taxAmount: number,
+    deliveryMethod: string
   ){  
     let updatedQuote: Quote;
     return this.quote.pipe(
       take(1),
       switchMap(quote => {
         let subtotal = quote.subTotal + totalProductPrice;
-        let grandtotal = quote.subTotal + taxAmount;
+        let grandtotal = subtotal + taxAmount;
 
         updatedQuote = new Quote(
           quote.id,
@@ -176,11 +172,10 @@ export class QuoteService {
           taxRate,
           taxAmount,
           subtotal,
-          grandtotal
+          grandtotal,
+          deliveryMethod
         );
-       
-        console.log("Updating quote", `${environment.firebase.databaseURL}quote/${quote.id}.json`);
-        console.log("Updated Quote", updatedQuote);
+
         return this.httpClient.put(
           `${environment.firebase.databaseURL}quote/${quote.id}.json`,
           {...updatedQuote, id:null}
@@ -207,10 +202,9 @@ export class QuoteService {
 
   calculateTax(zip: string = '48033'){
     let taxRate: TaxRate;
-    console.log("Getting tax rate from zip tax...");
     
     return this.httpClient
-      .get<TaxData>(`http://api.zip-tax.com/request/v40?key=${environment.ziptax.key}&postalcode=${zip}`).pipe(
+      .get<TaxData>(`${environment.firebase.cloudFunctionsUrl}getTaxRate`).pipe(
         map(result => {
           taxRate = new TaxRate(
             Math.random().toString(),
@@ -226,5 +220,18 @@ export class QuoteService {
         })
       );
 
+  }
+
+  deleteQuote(){
+    return this.accountService.userId.pipe(userId => {
+      if (!userId) {
+        throw new Error('Could not find user when clearing quote.');
+      }
+
+      console.log("Deleting quote item");
+
+      return this.httpClient
+        .delete(`${environment.firebase.databaseURL}quote.json?customerId=${userId}`);
+    })
   }
 }

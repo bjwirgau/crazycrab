@@ -8,6 +8,7 @@ import { Product } from './product.model';
 import { QuoteService } from '../../cart/quote.service';
 import { QuoteitemService } from '../../cart/quoteitem.service';
 import * as _ from 'lodash';
+import { QuoteItem } from '../../cart/quoteitem.model';
 
 interface ProductData {
   id: string,
@@ -56,7 +57,9 @@ export class ProductService {
     productPrice: number,
     totalProductPrice: number,
     productQuantity: number,
-    productOptions: {}){
+    productOptions: {},
+    imageUrl: string
+  ){
     this.quoteService.fetchQuote().subscribe(
       quote => {
         if (quote.length === 0){
@@ -71,7 +74,8 @@ export class ProductService {
                 productPrice,
                 totalProductPrice,
                 productQuantity,
-                productOptions
+                productOptions,
+                imageUrl
               ).subscribe()
             }
           )
@@ -79,7 +83,8 @@ export class ProductService {
           this.quoteService.updateQuote(
             totalProductPrice,
             0,
-            0
+            0,
+            ''
           ).subscribe(
             quote => {
               this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
@@ -106,7 +111,8 @@ export class ProductService {
                     productPrice,
                     totalProductPrice,
                     productQuantity,
-                    productOptions
+                    productOptions,
+                    imageUrl
                   ).subscribe()
                 }
               })
@@ -116,4 +122,30 @@ export class ProductService {
       }
     )
   }
+
+  decrementItemFromCart(quoteItem: QuoteItem){
+    this.quoteService.fetchQuote().subscribe(
+      quote => {
+        if (quote.length >= 0){
+          this.quoteService.updateQuote(
+            quoteItem.itemPrice*-1,
+            quote[0].taxRate,
+            quote[0].taxAmount,
+            quote[0].deliveryMethod
+          ).subscribe(
+            quote => {
+              this.quoteItemService.updateQuoteItem(
+                quoteItem,
+                quoteItem.totalItemPrice,
+                -1,
+                quoteItem.itemOptions
+              ).subscribe()
+            }
+          )
+        } 
+      }
+    )
+  }
 }
+
+

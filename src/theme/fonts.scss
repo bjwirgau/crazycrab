@@ -1,18 +1,24 @@
 @font-face {
     font-family: 'Myriad Pro';
-    src: url('assets/fonts/myriad/MyriadPro-Light.otf');
+    src: url('../assets/fonts/myriad/MyriadPro-Light.otf');
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: 'Myriad Pro Bold';
-    src: url('assets/fonts/myriad/MYRIADPRO-BOLD.OTF');
+    src: url('../assets/fonts/myriad/MYRIADPRO-BOLD.OTF');
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: 'Open Sans';
-    src: url('assets/fonts/opensans/OpenSans-Regular.ttf');
+    src: url('../assets/fonts/opensans/OpenSans-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'keep-calm';
+    src: url('../assets/fonts/keepcalm/KeepCalm-Medium.ttf');
     font-weight: normal;
     font-style: normal;
 }

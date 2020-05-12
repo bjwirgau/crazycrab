@@ -50,11 +50,6 @@ export class SeafoodService {
   }
 
   getSeafood(id: string) {
-    // this.httpClient.get(environment.firebase.databaseURL+`appetizer/${id}.json`)
-    //   .pipe(tap(resData => {
-    //     console.log(resData);
-    //   }))
-
     return this._seafood.pipe(
       take(1),
       map(appetizers => {

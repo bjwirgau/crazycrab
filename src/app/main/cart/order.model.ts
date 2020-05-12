@@ -1,4 +1,4 @@
-export class Quote {
+export class Order {
     constructor(
         public id: string,
         public userId: string,

@@ -38,12 +38,8 @@ export class ChooseyourownPage implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    console.log(form);
-    console.log(form.value);
     let isValid = false;
     this.loadedSeafood.forEach(seafood => {
-      // console.log(seafood.id);
-      // console.log('value: '+form.value['blackmussels']);
       if (form.value[seafood.id]) {
         isValid = true;
       }
@@ -63,8 +59,6 @@ export class ChooseyourownPage implements OnInit {
   }
 
   chooseSauce() {
-    console.log('Choosing Sauce');
-    
 
   }
 

@@ -18,7 +18,8 @@ interface QuoteItemData {
   totalItemPrice: number,
   itemQuantity: number,
   itemOptions: string[],
-  userId: string
+  userId: string,
+  imageUrl: string
 }
 
 @Injectable({
@@ -37,12 +38,10 @@ export class QuoteitemService {
     return this._quoteItems.asObservable();
   }
 
-  removeQuoteItem(
-    quoteId: string
-  ){
+  removeQuoteItem(quoteItemId: string){
     return this.httpClient
       .delete(
-        `${environment.firebase.databaseURL}quote-item/${quoteId}.json`
+        `${environment.firebase.databaseURL}quote-item/${quoteItemId}.json`
       )
       .pipe(
         switchMap(() => {
@@ -50,7 +49,7 @@ export class QuoteitemService {
         }),
         take(1),
         tap(quoteItems => {
-          this._quoteItems.next(quoteItems.filter(item => item.id !== quoteId))
+          this._quoteItems.next(quoteItems.filter(item => item.id !== quoteItemId))
         })
       );
   }
@@ -61,7 +60,8 @@ export class QuoteitemService {
     itemPrice: number,
     totalItemPrice: number,
     itemQuantity: number,
-    itemOptions: object
+    itemOptions: object,
+    imageUrl: string
   ) {
     let generatedId: string;
     let quoteItem: QuoteItem;
@@ -81,7 +81,8 @@ export class QuoteitemService {
           totalItemPrice,
           itemQuantity,
           itemOptions,
-          userId
+          userId,
+          imageUrl
         ); 
 
         return this.httpClient.post<{ name: string }>(
@@ -129,7 +130,8 @@ export class QuoteitemService {
                     resData[key].totalItemPrice,
                     resData[key].itemQuantity,
                     resData[key].itemOptions,
-                    resData[key].userId
+                    resData[key].userId,
+                    resData[key].imageUrl
                   ))
                 }
               }
@@ -175,10 +177,10 @@ export class QuoteitemService {
           updatedItemPrice,
           updatedQuantity,
           itemOptions,
-          oldQuoteItem.userId
+          oldQuoteItem.userId,
+          oldQuoteItem.imageUrl
         );
 
-        console.log(`${environment.firebase.databaseURL}quote-item/${oldQuoteItem.id}.json`);
         return this.httpClient.put(
           `${environment.firebase.databaseURL}quote-item/${oldQuoteItem.id}.json`,
           { ...updatedQuoteItems[updatedQuoteItemIndex], id: null}
@@ -190,21 +192,20 @@ export class QuoteitemService {
     )
   }
 
-  deleteQuoteItem(id: string){
-    console.log("Deleting quote item ", id);
-    console.log(`${environment.firebase.databaseURL}quote-item/${id}.json`)
-    return this.httpClient
-      .delete(
-        `${environment.firebase.databaseURL}quote-item/${id}.json`
-      )
-      .pipe(
-        switchMap(() => {
-          return this._quoteItems;
-        }),
-        take(1),
-        tap(quoteItems => {
-          this._quoteItems.next(quoteItems.filter(item => item.id !== id));
+  clearQuoteItems(){
+    return this.accountService.userId.pipe(
+      take(1),
+      tap(userId => {
+        if(!userId){
+          throw new Error('User id not found after completing payment.');
+        }
+
+        this.quoteItems.subscribe(quoteItems => {
+          quoteItems.forEach(quoteItem => {
+            this.removeQuoteItem(quoteItem.id).subscribe();
+          })
         })
-      );
+      })
+    )
   }
 }

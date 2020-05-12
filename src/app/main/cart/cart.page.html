@@ -1,10 +1,11 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title class="ion-text-center">Cart</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
+  <ion-button *ngIf="quoteItems.length > 0" type="button" color="secondary" expand="full" (click)="onDeliveryButtonClick()">Checkout</ion-button>
   <ion-grid class="ion-no-padding">
     <ion-row *ngIf="quoteItems.length == 0">
       <ion-col size="8" offset="2">
@@ -13,71 +14,95 @@
         </ion-item>
       </ion-col>
     </ion-row>
-      <div *ngIf="quoteItems.length > 0">
-        <ion-row>
-          <ion-col>
-            <ion-list>
-              <div *ngFor="let quoteItem of quoteItems">
-                <ion-item>
-                  <ion-thumbnail slot="start">
-                    <ion-img [src]="quoteItem.imageUrl"></ion-img>
-                  </ion-thumbnail>
-                  <ion-label class="ion-text-right">{{ quoteItem.itemName }}</ion-label>
-                  <ion-label class="ion-text-right">{{ quoteItem.itemQuantity }}</ion-label>
-                  <ion-label class="ion-text-right">{{ quoteItem.totalItemPrice | currency }}</ion-label>
-                  <ion-button color="danger" (click)="deleteCartItem(quoteItem.id)">
-                    <ion-icon name="trash-outline"></ion-icon>
+  </ion-grid>
+  <ion-grid>
+    <div *ngIf="quoteItems.length > 0">
+      <ion-list>
+        <ion-item-sliding *ngFor="let quoteItem of quoteItems" #removeQuoteItem>
+          <ion-item lines="none" class="cart-item ion-no-padding">
+            <ion-thumbnail slot="start">
+              <ion-img [src]="quoteItem.imageUrl"></ion-img>
+            </ion-thumbnail>
+            <ion-label>
+              <h3 class="cart-item"><b>{{ quoteItem.itemName }}</b></h3>
+              <p class="cart-item">{{ quoteItem.itemPrice | currency }}</p><br>
+              <p class="cart-item-options" *ngFor="let option of quoteItem.itemOptions | keyvalue">
+                {{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}
+              </p>
+            </ion-label>
+            <div class="cart-quantity">
+              <ion-label>
+                <div class="cart-quantity ion-no-padding ion-no-margin">
+                  <ion-button color="light" (click)="addQuantity(quoteItem)">
+                    <ion-icon name="caret-up-outline" color="primary" size="small"></ion-icon>
                   </ion-button>
-                </ion-item>
-                <ion-item lines="none" *ngFor="let options of quoteItem.itemOptions | keyvalue">
-                  <ion-label>{{ options.key }}: {{ options.value }}</ion-label>
-                </ion-item>
-              </div>
-            </ion-list>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-text>Sub Total</ion-text>
-            </ion-item>
-          </ion-col>
-          <ion-col size="8">
-            <ion-item>{{subTotal | currency}}</ion-item>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-text>Tax Amount</ion-text>
-            </ion-item>
-          </ion-col>
-          <ion-col size="8">
-            <ion-item *ngIf="isTaxLoading">
-              <ion-spinner></ion-spinner>
-            </ion-item>
-            <ion-item *ngIf="!isTaxLoading">{{taxAmount | currency}}</ion-item>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-text>Grand Total</ion-text>
-            </ion-item>
-          </ion-col>
-          <ion-col size="8">
-            <ion-item>{{grandTotal | currency}}</ion-item>
-          </ion-col>
-        </ion-row>
-      </div>
-    <ion-row *ngIf="quoteItems.length > 0">
-      <ion-col size-md="6" offset-md="3" size="8" offset="2">
-        <ion-button 
-        type="button" 
-        color="primary"
-        expand="block"
-        (click)="onDeliveryButtonClick()">Choose Delivery Options</ion-button>
-      </ion-col>
-    </ion-row>
+                </div>
+              </ion-label>
+              <ion-label>
+                <p id="cart-count">{{ quoteItem.itemQuantity }}</p>
+              </ion-label>
+              <ion-label>
+                <div class="cart-quantity ion-no-padding">
+                  <ion-button color="light" (click)="decrementQuantity(quoteItem)">
+                    <ion-icon name="caret-down-outline" color="tertiary" size="small"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-label>
+              <ion-label class="text-center padding-bottom">
+                <p class="cart-item">{{ quoteItem.totalItemPrice | currency }}</p>
+              </ion-label>
+            </div>
+          </ion-item>
+          <ion-item-options>
+            <ion-item-option color="danger" (click)="onRemoveQuoteItem(quoteItem.id, removeQuoteItem)">
+              <ion-icon name="trash" slot="icon-only"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+        <ion-item-divider color="primary">
+          <ion-label>
+            Delivery Method
+          </ion-label>
+        </ion-item-divider>
+        <ion-list>
+          <ion-item class="delivery-method" id="delivery-method" lines="none">
+            <ion-label>Pickup</ion-label>
+            <ion-checkbox slot="end" value="pickup" checked="true"></ion-checkbox>
+          </ion-item>
+        </ion-list>
+        <ion-item-divider color="primary">
+          <ion-label>
+            Order Totals
+          </ion-label>
+        </ion-item-divider>
+        <ion-grid>
+          <ion-row>
+            <ion-col class="ion-text-right totals-summary">
+              Subtotal
+            </ion-col>
+            <ion-col size="3" class="ion-text-right totals-summary">
+              {{ subTotal | currency }}
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right totals-summary">
+              Tax
+            </ion-col>
+            <ion-col size="3" class="ion-text-right totals-summary">
+              {{ taxAmount | currency }}
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right totals-summary">
+              GrandTotal
+            </ion-col>
+            <ion-col size="3" class="ion-text-right totals-summary">
+              {{ grandTotal | currency }}
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        
+      </ion-list>
+    </div>
   </ion-grid>
 </ion-content>

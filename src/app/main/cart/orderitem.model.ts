@@ -1,4 +1,4 @@
-export class QuoteItem {
+export class OrderItem {
     constructor(
         public id: string,
         public itemId: string,

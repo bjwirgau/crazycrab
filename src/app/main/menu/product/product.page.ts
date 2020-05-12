@@ -127,6 +127,7 @@ export class ProductPage implements OnInit, OnDestroy {
     const quantity = form.value['quantity'];
     const price = parseFloat(form.value['product']['price']);
     const totalPrice = parseFloat(form.value['currentPrice']);
+    const imageUrl = form.value['product']['imageUrl'];
 
     let quoteItemOptions: {} = {};
     this.productOptionsService.options.forEach(option => {
@@ -139,7 +140,8 @@ export class ProductPage implements OnInit, OnDestroy {
       price,
       totalPrice,
       quantity,
-      quoteItemOptions
+      quoteItemOptions,
+      imageUrl
     )
   }
 

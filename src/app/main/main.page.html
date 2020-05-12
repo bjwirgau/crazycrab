@@ -2,7 +2,7 @@
   <ion-tabs>
     <ion-tab-bar slot="bottom">
       <ion-tab-button tab="menu">
-        <ion-label>New Menu</ion-label>
+        <ion-label>Menu</ion-label>
         <ion-icon name="restaurant"></ion-icon>
       </ion-tab-button>
       <ion-tab-button tab="account">
@@ -17,9 +17,10 @@
         <ion-label>Location</ion-label>
         <ion-icon name="map"></ion-icon>
       </ion-tab-button>
-      <ion-tab-button tab="cart">
+      <ion-tab-button id="cart-tab" tab="cart">
         <ion-label>Menu</ion-label>
         <ion-icon name="cart"></ion-icon>
+        <ion-badge color="secondary">{{ count }}</ion-badge>
       </ion-tab-button>      
     </ion-tab-bar>
   </ion-tabs>

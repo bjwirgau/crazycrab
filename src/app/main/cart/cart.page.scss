@@ -1,0 +1,55 @@
+ion-thumbnail {
+    width: 100px;
+    height: 100px;
+}
+
+.cart-item {
+    font-family: 'keep-calm';
+    font-size: 0.7rem;
+    padding-left: 0.3rem;
+    // border: 1px solid var(--ion-color-primary);
+    // margin: 5px 0;
+    // box-shadow: 2px 2px 2px #888888;
+}
+
+#cart-count {
+    text-align: center;
+}
+
+.cart-quantity {
+    float: right;
+    padding: 0px;
+    font-size: 0.6rem;
+    display: block;
+}
+
+.cart-item-options {
+    font-size: 0.6rem;
+}
+
+.text-center {
+    width: 100%;
+    text-align: center;
+}
+
+.padding-bottom {
+    padding-bottom: 0.5rem;
+}
+
+.totals-summary {
+    float: right;
+    font-family: 'keep-calm';
+    font-size: 0.6rem;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.delivery-method {
+    ion-label {
+        font-family: 'keep-calm';
+        float: right;
+    }
+    ion-checkbox {
+        font-size: 0.6rem;
+    }
+}
