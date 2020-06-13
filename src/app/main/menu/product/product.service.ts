@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { map, tap, take } from 'rxjs/operators';
+import { map, tap, take, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { Product } from './product.model';
@@ -60,13 +60,21 @@ export class ProductService {
     productOptions: {},
     imageUrl: string
   ){
+    // this.quoteService.fetchQuote().pipe(
+    //   take(1),
+    //   switchMap(quote => {
+    //     if (quote.length > 0) {
+
+    //     }
+
+    //     return this.quoteService.quote;
+    //   })
+    // )
+
     this.quoteService.fetchQuote().subscribe(
       quote => {
         if (quote.length === 0){
-          this.quoteService.createQuote(
-            totalProductPrice
-          ).subscribe(
-            quote => {
+          this.quoteService.createQuote(totalProductPrice).subscribe(quote => {
               console.log("New Quote", quote);
               this.quoteItemService.saveQuoteItem(
                 productId,
@@ -88,17 +96,10 @@ export class ProductService {
           ).subscribe(
             quote => {
               this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
-                console.log("Retrieving quote items", quoteItems);
                 let productFound = false;
                 quoteItems.forEach(quoteItem => {
                   if (quoteItem['itemId'] === productId){
-                    console.log("Updating quote item", quoteItem['itemId']);
-                    console.log(quoteItem['itemOptions'], productOptions);
-                    if (!quoteItem['itemOptions']){
-                      productFound = true;
-                      this.quoteItemService.updateQuoteItem(quoteItem, totalProductPrice, productQuantity, productOptions).subscribe();
-                    }
-                    if (_.isEqual(productOptions, quoteItem['itemOptions'])){
+                    if (!quoteItem['itemOptions'] || _.isEqual(productOptions, quoteItem['itemOptions'])){
                       productFound = true;
                       this.quoteItemService.updateQuoteItem(quoteItem, totalProductPrice, productQuantity, productOptions).subscribe();
                     }

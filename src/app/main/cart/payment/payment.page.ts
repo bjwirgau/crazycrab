@@ -6,12 +6,14 @@ import { Quote } from '../quote.model';
 import { QuoteItem } from '../quoteitem.model';
 import { QuoteitemService } from '../quoteitem.service';
 import { OrderService } from '../order.service';
+import { Subscription } from 'rxjs';
 declare var Stripe;
 // import { Stripe } from '@ionic-native/stripe/ngx'
 
 const localFirebaseFunctionUrl:string = 'http://localhost:5000/crazycrab-4ec7b/us-central1/payWithStripe';
 const prodFirebaseFunctionUrl:string = 'https://us-central1-crazycrab-4ec7b.cloudfunctions.net/payWithStripe';
 const STRIPE_CARD_ERROR = "StripeCardError";
+const STRIPE_INVALID_REQUEST = "StripeInvalidRequestError";
 
 @Component({
   selector: 'app-payment',
@@ -28,6 +30,10 @@ export class PaymentPage implements OnInit {
   cardCvcElement: any;
   loadedQuote: Quote;
   loadedQuoteItems: QuoteItem[];
+  
+  private quoteSubscription: Subscription;
+  private quoteItemSubscription: Subscription;
+  private paymentSubscription: Subscription;
 
   cardBrandToPfClass = {
     'visa': 'pf-visa',
@@ -51,16 +57,12 @@ export class PaymentPage implements OnInit {
   ngOnInit() {
     this.setupStripe();
 
-    this.quoteService.quote.subscribe(quote => {
+    this.quoteSubscription = this.quoteService.quote.subscribe(quote => {
       this.loadedQuote = quote;
     });
-    this.quoteItemService.quoteItems.subscribe(quoteItems => {
+    this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.loadedQuoteItems = quoteItems;
     })
-  }
-
-  ionViewWillEnter() {
-    
   }
 
   setupStripe(){
@@ -135,36 +137,41 @@ export class PaymentPage implements OnInit {
   makePayment(token) {
     let grandTotal: number;
 
-    this.quoteService.quote.subscribe(quote => {
+    this.paymentSubscription = this.quoteService.grandtotal.subscribe(grandTotal => {
       this.isProcessing = true;
-      if (!quote || !quote.grandTotal){
+      if (!grandTotal){
         throw new Error('Could not retrieve order total amount!');
       }
 
-      grandTotal = parseFloat(quote.grandTotal.toFixed(2));
+      // Multiplying by 100 since Stripe requires integer values for charge amount
+      let stripeAdjustedGrandTotal = grandTotal * 100;
 
       this.httpClient
         .post(
           prodFirebaseFunctionUrl, 
           {
-            amount: grandTotal,
+            amount: Math.floor(stripeAdjustedGrandTotal),
             currency: "usd",
             source: token.id
           }
         )
         .subscribe(data => {
           this.isProcessing = false;
+          if (this.paymentSubscription){
+            this.paymentSubscription.unsubscribe;
+          }
 
           if(data.hasOwnProperty('id')) {
             this.paymentComplete = true;
 
             //create order
             this.orderService.createOrder(this.loadedQuote).subscribe();
+            this.orderService.createOrderItems(this.loadedQuoteItems).subscribe();
 
             //clear cart items
             this.quoteItemService.clearQuoteItems().subscribe();
             this.quoteService.deleteQuote().subscribe();
-          } else if(data.hasOwnProperty('type') && data['type'] === STRIPE_CARD_ERROR ) {
+          } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
             console.log(data['raw']['message']);
             const errorAlert = this.alertController.create({
               header: 'Payment Error',

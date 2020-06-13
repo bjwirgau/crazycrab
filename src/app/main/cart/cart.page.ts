@@ -40,12 +40,6 @@ export class CartPage implements OnInit {
   ngOnInit() {
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
-      this.subTotal = 0;
-      this.grandTotal = 0;
-      this.quoteItems.forEach(quoteItem => {
-        this.subTotal += quoteItem.totalItemPrice;
-      })
-      this.grandTotal = this.taxAmount + this.subTotal;
     });
   }
 
@@ -56,17 +50,27 @@ export class CartPage implements OnInit {
     });
     this.quoteService.fetchQuote().subscribe(quote => {
       this.quote = quote;
-      this.quoteService.calculateSubtotal();
-      // this.quoteService.calculateTax()
-      // .subscribe(taxRate => {
-      //   this.quoteService.taxAmount.subscribe(taxAmount => {
-      //     this.taxAmount = taxAmount;          
-      //     this.grandTotal = this.taxAmount + this.subTotal;
-      //     this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
-      //   });
-      // });
-      this.taxAmount = 1;
-      this.grandTotal = this.taxAmount + this.subTotal;
+      this.quoteService.calculateTotals();
+      this.quoteService.subtotal.subscribe(subtotal => {
+        this.subTotal = subtotal;
+      });
+      this.quoteService.taxAmount.subscribe(taxAmount => {
+        this.taxAmount = taxAmount;
+      })
+      this.quoteService.grandtotal.subscribe(grandtotal => {
+        this.grandTotal = grandtotal;
+      })
+      this.quoteService.calculateTax()
+      .subscribe(taxRate => {
+        this.quoteService.taxAmount.subscribe(taxAmount => {
+          this.taxAmount = taxAmount;          
+          this.grandTotal = this.taxAmount + this.subTotal;
+          this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
+        });
+      });
+      // this.taxAmount = 1;
+      // this.subTotal = this.quote[0].subTotal;
+      // this.grandTotal = this.taxAmount + this.subTotal;
     })
   }
 
@@ -114,7 +118,8 @@ export class CartPage implements OnInit {
 
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
-    this.quoteItemService.removeQuoteItem(id).subscribe(() => {
+    this.quoteItemService.removeQuoteItem(id).subscribe(quoteItems => {
+      this.quoteService.calculateTotals();
       this.quoteService.calculateTax()
       .subscribe(taxAmount => {
         this.quoteService.taxAmount.subscribe(taxAmount => {

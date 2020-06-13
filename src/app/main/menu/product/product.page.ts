@@ -30,6 +30,7 @@ export class ProductPage implements OnInit, OnDestroy {
   loadedProductOptions = [];
 
   isLoading = false;
+  productAdded = false;
 
   constructor(
     private productService: ProductService,
@@ -112,6 +113,7 @@ export class ProductPage implements OnInit, OnDestroy {
    */
   addItemToCart(form: NgForm) {
     let errors = false;
+    this.isLoading = true;
     console.log(form);
 
     if (!form.value['quantity']){
@@ -142,7 +144,9 @@ export class ProductPage implements OnInit, OnDestroy {
       quantity,
       quoteItemOptions,
       imageUrl
-    )
+    );
+    this.isLoading = false;
+    this.productAdded = true;
   }
 
 }

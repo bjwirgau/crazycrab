@@ -18,10 +18,11 @@ exports.payWithStripe = functions.https.onRequest((request, response) => {
     // See your keys here: https://dashboard.stripe.com/account/apikeys
 
     response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Headers', '*');
 
     // eslint-disable-next-line promise/catch-or-return
     stripe.charges.create({
-        amount: request.body.amount * 100,
+        amount: request.body.amount,
         currency: request.body.currency,
         source: request.body.source,
     }).then((charge) => {
@@ -37,7 +38,8 @@ exports.payWithStripe = functions.https.onRequest((request, response) => {
 exports.getTaxRate = functions.https.onRequest((request, response) => {
     var data;
     response.set('Access-Control-Allow-Origin', '*');
-    https.get('https://api.zip-tax.com/request/v40?key=YSQJxyvt5NG3OWgB&postalcode=90264', (res) => {
+    console.log(request);
+    https.get(`https://api.zip-tax.com/request/v40?key=YSQJxyvt5NG3OWgB&postalcode=${request.param('zipCode')}`, (res) => {
         res.on('data', (d) => {
             var buffer = Buffer.from(d);
             data = buffer.toString('utf-8');

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { QuoteItem } from './quoteitem.model';
 import { AccountService } from '../account/account.service';
@@ -28,6 +29,8 @@ interface QuoteItemData {
 export class QuoteitemService {
 
   private _quoteItems = new BehaviorSubject<QuoteItem[]>([]);
+
+  private quoteItemsSubscription = Subscription
 
   constructor(
     private accountService: AccountService,
@@ -85,13 +88,13 @@ export class QuoteitemService {
           imageUrl
         ); 
 
-        return this.httpClient.post<{ name: string }>(
+        return this.httpClient.post<{ id: string }>(
           `${environment.firebase.databaseURL}quote-item.json`, 
           {...quoteItem, id: null}
         );
       }), 
       switchMap(resData => {
-        generatedId = resData.name;
+        generatedId = resData.id;
         return this.quoteItems
       }),
       take(1),
@@ -200,7 +203,7 @@ export class QuoteitemService {
           throw new Error('User id not found after completing payment.');
         }
 
-        this.quoteItems.subscribe(quoteItems => {
+        this.quoteItemsSubscription = this.quoteItems.subscribe(quoteItems => {
           quoteItems.forEach(quoteItem => {
             this.removeQuoteItem(quoteItem.id).subscribe();
           })

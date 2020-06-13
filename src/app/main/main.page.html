@@ -18,9 +18,9 @@
         <ion-icon name="map"></ion-icon>
       </ion-tab-button>
       <ion-tab-button id="cart-tab" tab="cart">
-        <ion-label>Menu</ion-label>
+        <ion-label>Cart</ion-label>
         <ion-icon name="cart"></ion-icon>
-        <ion-badge color="secondary">{{ count }}</ion-badge>
+        <ion-badge color="secondary" *ngIf="count > 0">{{ count }}</ion-badge>
       </ion-tab-button>      
     </ion-tab-bar>
   </ion-tabs>

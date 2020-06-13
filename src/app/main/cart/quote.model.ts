@@ -9,6 +9,6 @@ export class Quote {
         public subTotal: number,
         public grandTotal: number,
         public deliveryMethod: string,
-        // public quoteItems: string[],
+        public zipCode: string
     ){}
 }

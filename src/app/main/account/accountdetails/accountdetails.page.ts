@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { SegmentChangeEventDetail } from '@ionic/core';
 import { AccountService } from '../account.service';
 import { AccountDetails } from './accountdetails.model';
 import { AccountdetailsService } from './accountdetails.service';
+import { Order } from '../../cart/order.model';
 import { Router } from '@angular/router';
 
 @Component({
@@ -11,7 +13,9 @@ import { Router } from '@angular/router';
 })
 export class AccountdetailsPage implements OnInit {
   loadedAccountDetails: AccountDetails[];
+  loadedOrders: Order[];
   isLoading = false;
+  accountView:string = 'general';
 
   constructor(
     private accountService: AccountService,
@@ -27,11 +31,36 @@ export class AccountdetailsPage implements OnInit {
       this.loadedAccountDetails = accountDetails;
       this.isLoading = false;
     });
+    this.accountDetailService.fetchOrderHistory().subscribe(orders => {
+      this.loadedOrders = orders;
+    })
   }
 
   logout() {
     this.accountService.logout();
     this.router.navigateByUrl('/main/tabs/account');
+  }
+
+  onSegmentChange(event: CustomEvent<SegmentChangeEventDetail>){
+    switch (event.detail.value){
+      case 'general': 
+        this.accountView = event.detail.value;
+        break;
+      case 'order-history':
+        this.accountView = event.detail.value;
+        break;
+      default:
+        this.accountView = 'general';
+    }
+  }
+
+  convertOrderId(id: string) {
+    let convertedId = '';
+    for (var i = 15; i < id.length; i++){
+      convertedId += id.charCodeAt(i).toString();
+    }
+
+    return convertedId;
   }
 
 }

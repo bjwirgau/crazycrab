@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 
 import { environment } from 'src/environments/environment';
@@ -27,7 +27,8 @@ interface QuoteData {
   taxAmount: number,
   subTotal: number,
   grandTotal: number,
-  deliveryMethod: string
+  deliveryMethod: string,
+  zipCode: string
 }
 
 @Injectable({
@@ -36,10 +37,11 @@ interface QuoteData {
 export class QuoteService {
 
   private _taxRate = new BehaviorSubject<TaxRate>(null);
-  private _subtotal: number = 0;
   private _quote = new BehaviorSubject<Quote>(null);
   private _taxAmount = new BehaviorSubject<number>(0);
-  private _grandTotal: number = 0;
+  private _grandTotal = new BehaviorSubject<number>(0);
+  private _subtotal = new BehaviorSubject<number>(0);
+  private _zipcode = new BehaviorSubject<string>('');
 
   constructor(
     private httpClient: HttpClient,
@@ -59,6 +61,14 @@ export class QuoteService {
   get taxAmount() {
     return this._taxAmount.asObservable();
   }
+  
+  get subtotal() {
+    return this._subtotal.asObservable();
+  }
+
+  get grandtotal() {
+    return this._grandTotal.asObservable();
+  }
 
   createQuote(totalProductPrice: number){
     let quote: Quote;
@@ -76,6 +86,7 @@ export class QuoteService {
       totalProductPrice,
       totalProductPrice,
       '',
+      ''
     );
 
     return this.accountService.userId.pipe(
@@ -84,18 +95,6 @@ export class QuoteService {
         if (!userId) {
           throw new Error('Error creating quote. User id not found');
         }
-
-        // if (!this._taxAmount){
-        //   throw new Error('Could not calculate tax amount!');
-        // }
-
-        // if (!this._subtotal){
-        //   throw new Error('Could not calculate subtotal!');
-        // }
-
-        // if (!this._grandTotal){
-        //   throw new Error('Could not calculate grand total');
-        // }
 
         quote.userId = userId;
 
@@ -136,7 +135,8 @@ export class QuoteService {
                   resData[key].taxAmount,
                   resData[key].subTotal,
                   resData[key].grandTotal,
-                  resData[key].deliveryMethod
+                  resData[key].deliveryMethod,
+                  resData[key].zipCode
                 ))
               }
             }
@@ -173,7 +173,8 @@ export class QuoteService {
           taxAmount,
           subtotal,
           grandtotal,
-          deliveryMethod
+          deliveryMethod,
+          quote.zipCode
         );
 
         return this.httpClient.put(
@@ -187,24 +188,34 @@ export class QuoteService {
     )
   }
 
-  calculateSubtotal(){
+  calculateTotals(){
     this.quoteItemService.quoteItems.subscribe(quoteItems => {
-      this._subtotal = 0;
-      for (let item of quoteItems){ 
-        this._subtotal += item.totalItemPrice;
+      let amount = 0;
+      quoteItems.forEach(quoteItem => {
+        amount += quoteItem.totalItemPrice;
+      });
+      this._subtotal.next(amount);
+      if (this._taxRate.getValue()){
+        this._taxAmount.next(amount * this._taxRate.getValue()['rate']['stateUseTax']);
       }
-    })
-  }
+      this._grandTotal.next(amount + this._taxAmount.getValue());
 
-  calculateGrandTotal(){
-    this._grandTotal
+    })
   }
 
   calculateTax(zip: string = '48033'){
     let taxRate: TaxRate;
     
+    if (this._zipcode.getValue() === zip){
+      return this.taxRate;
+    }
+
+    let params = new HttpParams().set("zipCode",zip);
+
     return this.httpClient
-      .get<TaxData>(`${environment.firebase.cloudFunctionsUrl}getTaxRate`).pipe(
+      .get<TaxData>(
+        `${environment.firebase.cloudFunctionsUrl}getTaxRate`, {params}
+        ).pipe(
         map(result => {
           taxRate = new TaxRate(
             Math.random().toString(),
@@ -216,7 +227,8 @@ export class QuoteService {
         }),
         tap(taxRate => {
           this._taxRate.next(taxRate);
-          this._taxAmount.next(taxRate.rate.taxSales*this._subtotal);
+          this._zipcode.next(taxRate.rate['geoPostalCode']);
+          this._taxAmount.next(taxRate.rate.taxSales*this._subtotal.getValue());
         })
       );
 
