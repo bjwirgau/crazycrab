@@ -135,54 +135,62 @@ export class PaymentPage implements OnInit {
   }
 
   makePayment(token) {
-    let grandTotal: number;
+    this.isProcessing = true;
 
-    this.paymentSubscription = this.quoteService.grandtotal.subscribe(grandTotal => {
-      this.isProcessing = true;
-      if (!grandTotal){
-        throw new Error('Could not retrieve order total amount!');
-      }
+    let grandTotal = this.quoteService.currentGrandtotal.value;
 
-      // Multiplying by 100 since Stripe requires integer values for charge amount
-      let stripeAdjustedGrandTotal = grandTotal * 100;
+    if (grandTotal == 0){
+      return;
+    }
 
-      this.httpClient
-        .post(
-          prodFirebaseFunctionUrl, 
-          {
-            amount: Math.floor(stripeAdjustedGrandTotal),
-            currency: "usd",
-            source: token.id
-          }
-        )
-        .subscribe(data => {
-          this.isProcessing = false;
-          if (this.paymentSubscription){
-            this.paymentSubscription.unsubscribe;
-          }
+    if (grandTotal === null){
+      throw new Error('Could not retrieve order total amount!');
+    }
 
-          if(data.hasOwnProperty('id')) {
-            this.paymentComplete = true;
+    // Multiplying by 100 since Stripe requires integer values for charge amount
+    let stripeAdjustedGrandTotal = grandTotal * 100;
 
-            //create order
-            this.orderService.createOrder(this.loadedQuote).subscribe();
-            this.orderService.createOrderItems(this.loadedQuoteItems).subscribe();
+    this.httpClient
+      .post(
+        prodFirebaseFunctionUrl, 
+        {
+          amount: Math.floor(stripeAdjustedGrandTotal),
+          currency: "usd",
+          source: token.id
+        }
+      )
+      .subscribe(data => {
+        this.isProcessing = false;
+        if (this.paymentSubscription){
+          this.paymentSubscription.unsubscribe;
+        }
 
-            //clear cart items
-            this.quoteItemService.clearQuoteItems().subscribe();
-            this.quoteService.deleteQuote().subscribe();
-          } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
-            console.log(data['raw']['message']);
-            const errorAlert = this.alertController.create({
-              header: 'Payment Error',
-              message: data['raw']['message'],
-              buttons: [{
-                text: 'Okay'
-              }]
-            }).then(alertEl => alertEl.present());
-          }
-        })
-    });
+        if(data.hasOwnProperty('id')) {
+          this.paymentComplete = true;
+          let orderId: number;
+
+          //create order
+          
+          this.orderService.fetchLatestOrder().subscribe(order => {
+            orderId = order.length === 1 ? order[0].orderId+1 : 1;
+            this.orderService.createOrder(this.loadedQuote, orderId).subscribe();
+            this.orderService.createOrderItems(this.loadedQuoteItems, orderId);
+          })
+
+          //clear cart items
+          this.quoteItemService.clearQuoteItems().subscribe();
+          this.quoteService.deleteQuote().subscribe();
+        } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
+          console.log(data['raw']['message']);
+          const errorAlert = this.alertController.create({
+            header: 'Payment Error',
+            message: data['raw']['message'],
+            buttons: [{
+              text: 'Okay'
+            }]
+          }).then(alertEl => alertEl.present());
+        }
+      });
   }
 
   setOutcome(result) {

@@ -70,6 +70,17 @@ export class QuoteService {
     return this._grandTotal.asObservable();
   }
 
+  get currentGrandtotal() {
+    return this._grandTotal;
+  }
+
+  /**
+   * 
+   * @todo Quote is created twice if user session expires. Need to verify customer session and redirect to login page if session is invalid. Unsure of how to reproduce. Attempted to clear auth data in browser but behaved normally. May just leave page/session alone for extended time and retry.
+   * 
+   * 
+   * @param totalProductPrice 
+   */
   createQuote(totalProductPrice: number){
     let quote: Quote;
     let createdAt: Date; 
@@ -98,6 +109,7 @@ export class QuoteService {
 
         quote.userId = userId;
 
+        console.log("Creating qoute...");
         return this.httpClient.post<{ id: string }>(
           `${environment.firebase.databaseURL}quote.json`, 
           {...quote, id: null}

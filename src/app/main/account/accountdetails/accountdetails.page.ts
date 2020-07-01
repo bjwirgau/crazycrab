@@ -5,6 +5,9 @@ import { AccountDetails } from './accountdetails.model';
 import { AccountdetailsService } from './accountdetails.service';
 import { Order } from '../../cart/order.model';
 import { Router } from '@angular/router';
+import { ModalController } from '@ionic/angular';
+import { OrderdetailsComponent } from './orderdetails/orderdetails.component'
+import { OrderService } from '../../cart/order.service';
 
 @Component({
   selector: 'app-accountdetails',
@@ -20,7 +23,9 @@ export class AccountdetailsPage implements OnInit {
   constructor(
     private accountService: AccountService,
     private accountDetailService: AccountdetailsService,
-    private router: Router
+    private orderService: OrderService, 
+    private router: Router,
+    private modalController: ModalController
   ) { }
 
   ngOnInit() {}
@@ -61,6 +66,19 @@ export class AccountdetailsPage implements OnInit {
     }
 
     return convertedId;
+  }
+
+  onOrderDetailsView(order: Order){
+    console.log(`Viewing order details for ${order.orderId}`);
+    // let orderItems = this.orderService.
+    this.modalController
+      .create({
+        component: OrderdetailsComponent,
+        componentProps: { selectedOrder: order }
+      })
+      .then(modalEl => {
+        modalEl.present();
+      })
   }
 
 }

@@ -203,7 +203,7 @@ export class QuoteitemService {
           throw new Error('User id not found after completing payment.');
         }
 
-        this.quoteItemsSubscription = this.quoteItems.subscribe(quoteItems => {
+        this.quoteItems.subscribe(quoteItems => {
           quoteItems.forEach(quoteItem => {
             this.removeQuoteItem(quoteItem.id).subscribe();
           })

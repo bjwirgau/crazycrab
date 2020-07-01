@@ -74,6 +74,7 @@ export class ProductPage implements OnInit, OnDestroy {
       this.productDetailSub.unsubscribe();
     }
     this.productOptionsService.clearOptions();
+    this.productAdded = false;
   }
 
   get price() {

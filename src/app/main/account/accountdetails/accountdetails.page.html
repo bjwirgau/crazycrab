@@ -41,8 +41,9 @@
     </ion-list>
   </div>
   <div *ngIf="accountView == 'order-history'">
-    <ion-card *ngFor="let order of loadedOrders">
+    <ion-card *ngFor="let order of loadedOrders" (click)="onOrderDetailsView(order)">
       <ion-card-subtitle>Order {{ convertOrderId(order.id) }}</ion-card-subtitle>
+      <p>Order Total: {{ order.grandTotal }}</p>
     </ion-card>
   </div>
 </ion-content>
