@@ -49,10 +49,10 @@ export class OrderService {
       '',
       new Date(),
       new Date(),
-      quote.taxRate,
-      quote.taxRate,
-      quote.subTotal,
-      quote.grandTotal,
+      Math.round((quote.taxRate+Number.EPSILON)*100)/100,
+      Math.round((quote.taxAmount+Number.EPSILON)*100)/100,
+      Math.round((quote.subTotal+Number.EPSILON)*100)/100,
+      Math.round((quote.grandTotal+Number.EPSILON)*100)/100,
       quote.deliveryMethod
     );
 
@@ -90,8 +90,8 @@ export class OrderService {
           new Date(),
           new Date(),
           quoteItem.itemName,
-          quoteItem.itemPrice,
-          quoteItem.totalItemPrice,
+          Math.round((quoteItem.itemPrice+Number.EPSILON)*100)/100,
+          Math.round((quoteItem.totalItemPrice+Number.EPSILON)*100)/100,
           quoteItem.itemQuantity,
           quoteItem.itemOptions,
           userId,

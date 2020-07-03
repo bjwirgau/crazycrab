@@ -41,9 +41,24 @@
     </ion-list>
   </div>
   <div *ngIf="accountView == 'order-history'">
-    <ion-card *ngFor="let order of loadedOrders" (click)="onOrderDetailsView(order)">
-      <ion-card-subtitle>Order {{ convertOrderId(order.id) }}</ion-card-subtitle>
-      <p>Order Total: {{ order.grandTotal }}</p>
-    </ion-card>
+    <ion-grid *ngFor="let order of loadedOrders">
+      <ion-row (click)="onOrderDetailsView(order)">
+        <ion-col>
+          <ion-grid>
+            <ion-row>
+              <ion-col>Order {{ order.orderId }}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <p>Order Total:</p>
+              </ion-col>
+              <ion-col>
+                <p style="float:right">{{ order.grandTotal | currency }}</p>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-col>
+       </ion-row>
+    </ion-grid>
   </div>
 </ion-content>

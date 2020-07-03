@@ -143,10 +143,10 @@ export class QuoteService {
                   resData[key].userId,
                   resData[key].createdAt,
                   resData[key].updatedAt,
-                  resData[key].taxRate,
-                  resData[key].taxAmount,
-                  resData[key].subTotal,
-                  resData[key].grandTotal,
+                  Math.round((resData[key].taxRate+Number.EPSILON)*100)/100,
+                  Math.round((resData[key].taxAmount+Number.EPSILON)*100)/100,
+                  Math.round((resData[key].subTotal+Number.EPSILON)*100)/100,
+                  Math.round((resData[key].grandTotal+Number.EPSILON)*100)/100,
                   resData[key].deliveryMethod,
                   resData[key].zipCode
                 ))
@@ -181,10 +181,10 @@ export class QuoteService {
           quote.userId,
           quote.createdAt,
           new Date(),
-          taxRate,
-          taxAmount,
-          subtotal,
-          grandtotal,
+          Math.round((taxRate+Number.EPSILON)*100)/100,
+          Math.round((taxAmount+Number.EPSILON)*100)/100,
+          Math.round((subtotal+Number.EPSILON)*100)/100,
+          Math.round((grandtotal+Number.EPSILON)*100)/100,
           deliveryMethod,
           quote.zipCode
         );
