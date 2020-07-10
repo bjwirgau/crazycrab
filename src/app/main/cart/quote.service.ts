@@ -202,17 +202,26 @@ export class QuoteService {
 
   calculateTotals(){
     this.quoteItemService.quoteItems.subscribe(quoteItems => {
-      let amount = 0;
+      let subtotal = 0;
       quoteItems.forEach(quoteItem => {
-        amount += quoteItem.totalItemPrice;
+        subtotal += quoteItem.totalItemPrice;
       });
-      this._subtotal.next(amount);
+
+      this._subtotal.next(subtotal);
       if (this._taxRate.getValue()){
-        this._taxAmount.next(amount * this._taxRate.getValue()['rate']['stateUseTax']);
+        this._taxAmount.next(subtotal * this._taxRate.getValue()['rate']['stateUseTax']);
       }
-      this._grandTotal.next(amount + this._taxAmount.getValue());
+      this._grandTotal.next(subtotal + this._taxAmount.getValue());
 
     })
+  }
+
+  updateTotals(subtotal: number){
+    this._subtotal.next(subtotal);
+    if (this._taxRate.getValue()){
+      this._taxAmount.next(subtotal * this._taxRate.getValue()['rate']['stateUseTax']);
+    }
+    this._grandTotal.next(subtotal + this._taxAmount.getValue());
   }
 
   calculateTax(zip: string = '48033'){

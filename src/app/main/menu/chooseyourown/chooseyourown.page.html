@@ -28,36 +28,44 @@
           <ion-list>
             <ion-item *ngFor="let seafood of loadedSeafood; let index = index">
               <ion-grid>
+                <!-- Product Image -->
                 <ion-row>
                   <ion-col size="3" class="ion-text-center">
                     <ion-img [src]="seafood.imageUrl"></ion-img>
                   </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col size="4" class="chooseyourown">
-                    <ion-label style="font-family:'Open Sans'">{{ seafood.name }}
-                      <div>
-                        {{ seafood.price | currency }}  /pound
-                      </div>
-                    </ion-label>
-                  </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col size="10">
-                    <ion-button [id]="'button-'+seafood.id+'-remove'" class="seafood-button" color="tertiary" expand="block" (click)="removeSeafood($event)">
-                      <ion-icon name="remove"></ion-icon>
-                    </ion-button>
-                  </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col size="10">
-                    <ion-button [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" expand="block" (click)="addSeafood($event)">
-                      <ion-icon name="add"></ion-icon>
-                    </ion-button>
-                  </ion-col>
                   <ion-col>
-                    <label>Pounds</label>
-                    <ion-input [id]="seafood.id" [name]="seafood.id" ngModel #inputCtrl="ngModel"></ion-input>
+                    <ion-grid>
+                      <ion-row> 
+                        <ion-col size="7" class="chooseyourown">
+                          {{ seafood.name }}
+                        </ion-col>
+                        <ion-col size="2">
+                          <ion-button [id]="'button-'+seafood.id+'-remove'" class="seafood-button" color="tertiary" size="small" (click)="reduceSeafood($event, seafood)">-</ion-button>
+                        </ion-col>
+                        <ion-col size="2">
+                          <ion-button [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="small" (click)="addSeafood($event, seafood)">+</ion-button>
+                        </ion-col>
+                        <ion-col>
+                          <ion-item class="ion-no-padding" lines="none">
+                              {{ seafood.price | currency }} / pound
+                          </ion-item>
+                        </ion-col>
+                        <ion-col size="5" class="ion-no-padding">
+                          <ion-item lines="none" class="ion-no-padding">
+                            <ion-label class="ion-no-padding">Pound(s):</ion-label>
+                            <ion-input class="ion-no-padding" [id]="seafood.id" [name]="seafood.id" ngModel #inputCtrl="ngModel" placeholder="0.0"></ion-input>
+                          </ion-item>
+                        </ion-col>
+                      </ion-row>
+                      <ion-row>
+                        <ion-col offset="7">
+                          <ion-item lines="none" class="ion-no-padding">
+                            <ion-label class="ion-no-padding">Subtotal:</ion-label>
+                            <ion-input class="ion-no-padding" [id]="seafood.id+'-subtotal'" [name]="seafood.id+'-subtotal'" ngModel #inputCtrl="ngModel" disabled></ion-input>
+                          </ion-item>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
                   </ion-col>
                 </ion-row>
               </ion-grid>

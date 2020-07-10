@@ -21,6 +21,7 @@ export class CartPage implements OnInit {
   quoteItems: QuoteItem[];
   quote: Quote[];
   private cartSub: Subscription;
+  private quoteSub: Subscription;
   private taxSub: Subscription;
   isLoading = false;
   taxRate: number;
@@ -43,14 +44,29 @@ export class CartPage implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    if(this.cartSub){
+      this.cartSub.unsubscribe();
+    }    
+  }
+
   ionViewWillEnter() {
     this.isLoading = true;
     this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
-    this.quoteService.fetchQuote().subscribe(quote => {
+    this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
+      this.quoteItems = quoteItems;
+    });
+    this.quoteSub = this.quoteService.fetchQuote().subscribe(quote => {
       this.quote = quote;
-      this.quoteService.calculateTotals();
+      
+      let amount = 0;
+      this.quoteItems.forEach(item => {
+          amount += item.totalItemPrice;
+      });
+      this.quoteService.updateTotals(amount);
+
       this.quoteService.subtotal.subscribe(subtotal => {
         this.subTotal = subtotal;
       });
@@ -74,6 +90,12 @@ export class CartPage implements OnInit {
     })
   }
 
+  ionViewWillLeave() {
+    if (this.quoteSub){
+      this.quoteSub.unsubscribe();
+    }
+  }
+
   onRemoveQuoteItem(quoteItemId: string, removeBookingEl: IonItemSliding){
     this.loadingCtrl.create({ message: 'Removing item...'}).then(loadingEl => {
       loadingEl.present();
@@ -93,13 +115,25 @@ export class CartPage implements OnInit {
       1,
       quoteItem.itemOptions,
       quoteItem.imageUrl
-    )
+    );
+
+    let amount = 0;
+    this.quoteItems.forEach(item => {
+        amount += item.itemPrice*(item.itemQuantity+1);
+    });
+    this.quoteService.updateTotals(amount);
   }
 
   decrementQuantity(quoteItem: QuoteItem) {
     if (quoteItem.itemQuantity > 1){
       console.log("Removing Single Item", quoteItem);
       this.productService.decrementItemFromCart(quoteItem)
+
+      let amount = 0;
+      this.quoteItems.forEach(item => {
+          amount += item.itemPrice*(item.itemQuantity-1);
+      });
+      this.quoteService.updateTotals(amount);
     }
   }
 
@@ -110,16 +144,16 @@ export class CartPage implements OnInit {
     this.router.navigateByUrl('/main/tabs/cart/payment');
   }
 
-  ngOnDestroy() {
-    if(this.cartSub){
-      this.cartSub.unsubscribe();
-    }
-  }
-
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
     this.quoteItemService.removeQuoteItem(id).subscribe(quoteItems => {
-      this.quoteService.calculateTotals();
+      // this.quoteService.calculateTotals();
+      let amount = 0;
+      this.quoteItems.forEach(item => {
+          amount += item.totalItemPrice;
+      });
+      this.quoteService.updateTotals(amount);
+
       this.quoteService.calculateTax()
       .subscribe(taxAmount => {
         this.quoteService.taxAmount.subscribe(taxAmount => {
@@ -128,5 +162,13 @@ export class CartPage implements OnInit {
         });
       });
     });
+  }
+
+  isObject(option): boolean {
+    return typeof option === 'object'
+  }
+
+  getValues(values) {
+    return Object.values(values);
   }
 }

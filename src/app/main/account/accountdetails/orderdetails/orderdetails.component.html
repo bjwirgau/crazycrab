@@ -43,13 +43,23 @@
                   <p>{{ orderItem.itemPrice | currency }}</p>
                 </ion-col>
               </ion-row>
-              <ion-row>
+              <!-- <ion-row>
                 <ion-col>
                   <p class="cart-item-options" *ngFor="let option of orderItem.itemOptions | keyvalue">
                     {{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}
                   </p>
                 </ion-col>
-              </ion-row>
+              </ion-row> -->
+              <ion-row *ngFor="let option of orderItem.itemOptions | keyvalue">
+                  <ion-col>
+                    <div *ngIf="!isObject(option.value)">{{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}</div>
+                    <div *ngIf="isObject(option.value)">
+                      <div *ngFor="let value of getValues(option.value)">
+                        {{ value }}
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
 
             </ion-grid>
           </ion-label>

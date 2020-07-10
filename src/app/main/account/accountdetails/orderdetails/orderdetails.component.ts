@@ -29,4 +29,12 @@ export class OrderdetailsComponent implements OnInit {
     this.modalController.dismiss(null, 'cancel');
   }
 
+  isObject(option): boolean {
+    return typeof option === 'object'
+  }
+
+  getValues(values) {
+    return Object.values(values);
+  }
+
 }

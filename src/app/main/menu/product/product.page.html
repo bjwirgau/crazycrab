@@ -14,7 +14,7 @@
   </div>
   <div *ngIf="!isLoading && product != null">
     <form #form="ngForm" (ngSubmit)="addItemToCart(form)">
-      <ion-grid class="ion-no-padding">
+      <ion-grid>
         <!-- Product Image -->
         <ion-row>
           <ion-col>
@@ -26,24 +26,19 @@
 
         <ion-row>
           <ion-col>
-            <ion-item lines="none">
-              <h5>{{ product.name }}</h5>
-            </ion-item>
+            <h5>{{ product.name }}</h5>
           </ion-col>
         </ion-row>
 
-        <ion-col size="4">
-          <ion-item lines="none">
-            <div>$</div>
-            <ion-input type="text" readonly name="currentPrice" [value]="product.price" [(ngModel)]="currentPrice"></ion-input>
-          </ion-item>
-        </ion-col>
-
+        <ion-row>
+          <ion-col size="4">
+            <p id="product-price">{{ product.price | currency }}</p>
+          </ion-col>      
+        </ion-row>
+        
         <ion-row>
           <ion-col>
-            <ion-item lines="none">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris et arcu mauris. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec iaculis venenatis dui a eleifend.
-            </ion-item>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris et arcu mauris. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec iaculis venenatis dui a eleifend.
           </ion-col>
         </ion-row>
 
@@ -59,20 +54,25 @@
           </ion-col>
         </ion-row> -->
 
-        <ion-row *ngFor="let option of productOptions">
-            <ion-col *ngIf="option.key !== 'price'">
-              <ion-item lines="none">
-                <ion-label>Option</ion-label>
-                <ion-icon name="football-outline" size="large"></ion-icon>
-                <ion-checkbox class="product-option"></ion-checkbox>
+        <ion-row *ngFor="let options of productOptions">
+          <ion-col size="6">
+            {{ options.label }}
+          </ion-col>
+          <ion-col *ngFor="let option of options.values" size="2">
+            <ion-icon name="football-outline" size="large" (click)="setProductOption(options, option.value)"></ion-icon>
+            <ion-checkbox [id]="getOptionId(options.id, option.value)" class="product-option" [value]="option.value"></ion-checkbox>
+            <!-- <ion-item lines="none">
+              <ion-label>Option</ion-label>
+              <ion-icon name="football-outline" size="large" (click)="setProductOption(option)"></ion-icon>
+              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
 
-                <ion-icon name="baseball-outline" size="large"></ion-icon>
-                <ion-checkbox class="product-option"></ion-checkbox>
+              <ion-icon name="baseball-outline" size="large" (click)="setProductOption(option.key)"></ion-icon>
+              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
 
-                <ion-icon name="american-football-outline" size="large"></ion-icon>
-                <ion-checkbox class="product-option"></ion-checkbox>
-              </ion-item>
-            </ion-col>
+              <ion-icon name="american-football-outline" size="large" (click)="setProductOption(option.key)"></ion-icon>
+              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
+            </ion-item> -->
+          </ion-col>
         </ion-row>
         <!-- Product Quantity -->
         <!-- <ion-row class="ion-justify-content-center ion-align-items-center ion-padding" style="height: 100%">

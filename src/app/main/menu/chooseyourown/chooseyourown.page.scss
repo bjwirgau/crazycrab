@@ -1,9 +1,12 @@
 .chooseyourown {
     font-size: 0.8rem;
 }
-.seafood-button {
-    width:100%;
+.seafood-input {
+    padding-right: 5px;
 }
 ion-icon {
     size: 32px;
+}
+ion-item.item-input {
+    padding-top: 0;
 }

@@ -9,6 +9,10 @@ const routes: Routes = [
     component: MenuPage
   },
   {
+    path: 'chooseyourown',
+    loadChildren: () => import('./chooseyourown/chooseyourown.module').then( m => m.ChooseyourownPageModule)
+  },
+  {
     path: ':productId',
     loadChildren: () => import('./product/product.module').then( m => m.ProductPageModule)
   }

@@ -52,6 +52,7 @@ export class MenuPage implements OnInit, OnDestroy {
           this.isLoading = false;
         });
         break;
+      case 'chooseyourown':
       case 'product':
         this.router.navigateByUrl('/main/tabs/menu/'+category);
         break;

@@ -4,7 +4,7 @@ import { ProductService } from './product.service';
 import { Subscription, BehaviorSubject } from 'rxjs';
 import { MenuService } from '../menu.service';
 import { Product } from './product.model';
-import { NgForm } from '@angular/forms';
+import { NgForm, CheckboxRequiredValidator } from '@angular/forms';
 import { ProductOptionsService } from './product-options.service';
 import { QuoteService } from '../../cart/quote.service';
 import { QuoteitemService } from '../../cart/quoteitem.service';
@@ -128,13 +128,22 @@ export class ProductPage implements OnInit, OnDestroy {
     }
 
     const quantity = form.value['quantity'];
-    const price = parseFloat(form.value['product']['price']);
+    // const price = parseFloat(form.value['product']['price']);
+    const price = parseFloat(document.querySelector('#product-price').innerHTML.replace('$',''));
+    
     const totalPrice = parseFloat(form.value['currentPrice']);
     const imageUrl = form.value['product']['imageUrl'];
 
+    const productOptions = document.querySelectorAll('ion-checkbox[checked=true]');
+
     let quoteItemOptions: {} = {};
-    this.productOptionsService.options.forEach(option => {
-      quoteItemOptions[option.id] = option.values[form.value[option.id]]['value'];
+    // this.productOptionsService.options.forEach(option => {
+    //   quoteItemOptions[option.id] = option.values[form.value[option.id]]['value'];
+    // })
+    productOptions.forEach(option => {
+      const optionKey = option.id.split("-")[0];
+      const optionValue = option.id.split("-")[1];
+      quoteItemOptions[optionKey] = quoteItemOptions[optionValue];
     })
 
     this.productService.addItemToCart(
@@ -148,6 +157,37 @@ export class ProductPage implements OnInit, OnDestroy {
     );
     this.isLoading = false;
     this.productAdded = true;
+  }
+
+  setProductOption(option, optionValue){
+    console.log(option);
+    optionValue = this.convertIdValue(optionValue);
+    const checkEl = document.querySelector(`#${option.id}-${optionValue}`);
+    const allCheckEls = document.querySelectorAll(`[id^="${option.id}"]`);
+    if (checkEl.getAttribute('checked') === "false" || checkEl.getAttribute('checked') === null){
+      allCheckEls.forEach(el => {
+        el.setAttribute('checked', 'false');
+        el.previousElementSibling.setAttribute('style', '');
+      })
+      checkEl.setAttribute('checked', 'true');
+      checkEl.previousElementSibling.setAttribute('style', 'color:red');
+      
+    } else {
+      checkEl.setAttribute('checked', 'false');
+      checkEl.previousElementSibling.setAttribute('style', '');
+    }
+  }
+
+  getOptionId(id, value){
+    value = this.convertIdValue(value);
+    return id+"-"+value;
+  }
+
+  convertIdValue(value){
+    if (typeof(value) === "number"){
+      value = value.toString();
+    }
+    return value.replace(/ /g,'').toLowerCase();
   }
 
 }

@@ -8,26 +8,14 @@
 </ion-header>
   
 <ion-content>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="reviewYourSeafood()">Mild</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="reviewYourSeafood()">Medium</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="reviewYourSeafood()">Hot</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="reviewYourSeafood()">Extra Hot</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <p *ngIf="isLoading" class="ion-text-center">
+      <ion-spinner name="dots" class="ion-text-center"></ion-spinner>
+    </p>
+    <ion-grid *ngIf="!isLoading">
+      <ion-row *ngFor="let spicy of loadedSpicies">
+        <ion-col>
+          <ion-button expand="block" color="primary" (click)="pickYourSpicy(spicy.label)">{{ spicy.label }}</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 </ion-content>

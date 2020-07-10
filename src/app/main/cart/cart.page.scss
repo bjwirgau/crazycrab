@@ -22,8 +22,9 @@ ion-thumbnail {
     display: block;
 }
 
-.cart-item-options {
+.cart-item-details {
     font-size: 0.6rem;
+    padding: 0 0.5rem;
 }
 
 .text-center {
@@ -51,4 +52,8 @@ ion-thumbnail {
     ion-checkbox {
         font-size: 0.6rem;
     }
+}
+
+.item-subtotal {
+    display: block;
 }

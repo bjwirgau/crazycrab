@@ -8,25 +8,13 @@
 </ion-header>
   
 <ion-content>
-  <ion-grid>
-    <ion-row>
+  <p *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner name="dots"></ion-spinner>
+  </p>
+  <ion-grid *ngIf="!isLoading">
+    <ion-row *ngFor="let flavor of loadedFlavors">
       <ion-col>
-        <ion-button expand="block" color="primary" (click)="pickYourSpicy()">Cajun</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="pickYourSpicy()">Lemon Pepper</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="pickYourSpicy()">Garlic Butter</ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="pickYourSpicy()">All Mixed</ion-button>
+        <ion-button expand="block" color="primary" (click)="pickYourFlavor(flavor.label)">{{ flavor.label }}</ion-button>
       </ion-col>
     </ion-row>
   </ion-grid>

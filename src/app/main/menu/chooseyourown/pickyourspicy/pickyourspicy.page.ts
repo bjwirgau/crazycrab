@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { SeafoodService } from '../../chooseyourown/seafood.service';
+import { PickyourSpicyservice } from './pickyourspicy.service';
+import { Spicy } from './spicy.model';
 
 @Component({
   selector: 'app-pickyourspicy',
@@ -8,14 +11,28 @@ import { Router } from '@angular/router';
 })
 export class PickyourspicyPage implements OnInit {
 
+  loadedSpicies: Spicy[];
+  isLoading: boolean;
+
   constructor(
-    private router: Router
+    private router: Router,
+    private seafoodService: SeafoodService,
+    private spicyService: PickyourSpicyservice
   ) { }
 
   ngOnInit() {
+    this.spicyService.spicies.subscribe(spicies => {
+      this.loadedSpicies = spicies;
+    });
+
+    this.isLoading = true;
+    this.spicyService.fetchSpicies().subscribe(() => {
+      this.isLoading = false;
+    })
   }
 
-  reviewYourSeafood() {
+  pickYourSpicy(spicyLevel: string) {
+    this.seafoodService.chooseSpicyLevel(spicyLevel);
     this.router.navigateByUrl('/main/tabs/menu/chooseyourown/reviewyourseafood');
   }
 }
