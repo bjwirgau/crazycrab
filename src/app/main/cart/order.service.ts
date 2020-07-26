@@ -31,6 +31,7 @@ interface OrderItemData {
 export class OrderService {
 
   private _orderItems = new BehaviorSubject<OrderItem[]>([]);
+  orderComplete = new BehaviorSubject<boolean>(false);
 
   constructor(
     private httpClient: HttpClient,
@@ -42,7 +43,6 @@ export class OrderService {
   }
 
   createOrder(quote: Quote, orderId: number){
-
     let order = new Order(
       Math.random().toString(),
       orderId,
@@ -102,8 +102,7 @@ export class OrderService {
           `${environment.firebase.databaseURL}order-item.json`, 
           {...orderItem, id: null}
         );
-      }),
-
+      })
     )
     
   }
@@ -168,7 +167,7 @@ export class OrderService {
       `${environment.firebase.databaseURL}order.json?orderBy="createdAt"&limitToLast=1`
     ).pipe(
       map(resData => {
-        const order = [];
+        const order:Order[] = [];
 
         for (const key in resData){
           if (resData.hasOwnProperty(key)){

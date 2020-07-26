@@ -1,0 +1,11 @@
+{
+  "sendgrid": {
+    "key": "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"
+  },
+  "stripe": {
+    "token": "sk_test_PnmpVoBbf5iX1l5dD1R8WHgk002ccLA1ZA"
+  },
+  "ziptax": {
+    "key": "YSQJxyvt5NG3OWgB"
+  }
+}

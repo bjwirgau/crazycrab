@@ -122,16 +122,16 @@ export class ProductPage implements OnInit, OnDestroy {
       console.log('Error getting product quantity.');
     }
 
-    if (!form.value['currentPrice']){
+    const price = parseFloat(document.querySelector('#product-price').innerHTML.replace('$',''));
+    form['price'] = price.toString();
+    if (!price){
       errors = true;
       console.log('Error getting current price');
     }
 
     const quantity = form.value['quantity'];
-    // const price = parseFloat(form.value['product']['price']);
-    const price = parseFloat(document.querySelector('#product-price').innerHTML.replace('$',''));
     
-    const totalPrice = parseFloat(form.value['currentPrice']);
+    const totalPrice = parseFloat((price * quantity).toFixed(2));
     const imageUrl = form.value['product']['imageUrl'];
 
     const productOptions = document.querySelectorAll('ion-checkbox[checked=true]');
@@ -143,7 +143,7 @@ export class ProductPage implements OnInit, OnDestroy {
     productOptions.forEach(option => {
       const optionKey = option.id.split("-")[0];
       const optionValue = option.id.split("-")[1];
-      quoteItemOptions[optionKey] = quoteItemOptions[optionValue];
+      quoteItemOptions[optionKey] = optionValue;
     })
 
     this.productService.addItemToCart(

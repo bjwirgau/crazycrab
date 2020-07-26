@@ -7,6 +7,7 @@ import { QuoteItem } from '../quoteitem.model';
 import { QuoteitemService } from '../quoteitem.service';
 import { OrderService } from '../order.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 declare var Stripe;
 // import { Stripe } from '@ionic-native/stripe/ngx'
 
@@ -51,7 +52,8 @@ export class PaymentPage implements OnInit {
     private quoteService: QuoteService,
     private alertController: AlertController,
     private quoteItemService: QuoteitemService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -136,6 +138,7 @@ export class PaymentPage implements OnInit {
 
   makePayment(token) {
     this.isProcessing = true;
+    let self = this;
 
     let grandTotal = this.quoteService.currentGrandtotal.value;
 
@@ -168,18 +171,22 @@ export class PaymentPage implements OnInit {
         if(data.hasOwnProperty('id')) {
           this.paymentComplete = true;
           let orderId: number;
-
-          //create order
           
           this.orderService.fetchLatestOrder().subscribe(order => {
             orderId = order.length === 1 ? order[0].orderId+1 : 1;
-            this.orderService.createOrder(this.loadedQuote, orderId).subscribe();
-            this.orderService.createOrderItems(this.loadedQuoteItems, orderId);
-          })
+            this.orderService.createOrder(this.loadedQuote, orderId).subscribe(() => {
+              this.orderService.createOrderItems(self.loadedQuoteItems, orderId);
+              this.orderService.fetchOrderItems(order[0].orderId).subscribe(() => {
+                //clear cart items
+                this.quoteItemService.clearQuoteItems().subscribe();
+                this.quoteService.deleteQuote().subscribe();
 
-          //clear cart items
-          this.quoteItemService.clearQuoteItems().subscribe();
-          this.quoteService.deleteQuote().subscribe();
+                this.orderService.orderComplete.next(true);
+
+                this.router.navigateByUrl('/main/tabs/cart/confirmation');
+              });
+            });
+          });
         } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
           console.log(data['raw']['message']);
           const errorAlert = this.alertController.create({

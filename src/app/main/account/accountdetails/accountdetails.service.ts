@@ -49,7 +49,7 @@ export class AccountdetailsService {
           )
           .pipe(
             map(accountDetailData => {
-              const accountDetails = [];
+              const accountDetails:AccountDetails[] = [];
 
               for (const key in accountDetailData) {
                 if (accountDetailData.hasOwnProperty(key)) {

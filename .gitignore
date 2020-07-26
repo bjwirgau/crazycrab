@@ -32,3 +32,4 @@ config.xml
 /www
 /resources
 /ios
+sendgrid.env

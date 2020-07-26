@@ -22,7 +22,12 @@ export class CartPage implements OnInit {
   quote: Quote[];
   private cartSub: Subscription;
   private quoteSub: Subscription;
+  private quoteitemSub: Subscription;
   private taxSub: Subscription;
+  private taxUpdateSub: Subscription;
+  private updateQuoteSub: Subscription;
+  private subtotalSub: Subscription;
+  private grandtotalSub: Subscription;
   isLoading = false;
   taxRate: number;
   taxAmount: number;
@@ -52,13 +57,17 @@ export class CartPage implements OnInit {
 
   ionViewWillEnter() {
     this.isLoading = true;
-    this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
+    this.quoteitemSub = this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
     this.quoteSub = this.quoteService.fetchQuote().subscribe(quote => {
+      if(!quote){
+        return;
+      }
+      
       this.quote = quote;
       
       let amount = 0;
@@ -67,32 +76,46 @@ export class CartPage implements OnInit {
       });
       this.quoteService.updateTotals(amount);
 
-      this.quoteService.subtotal.subscribe(subtotal => {
+      this.subtotalSub = this.quoteService.subtotal.subscribe(subtotal => {
         this.subTotal = subtotal;
       });
-      this.quoteService.taxAmount.subscribe(taxAmount => {
+      this.taxSub = this.quoteService.taxAmount.subscribe(taxAmount => {
         this.taxAmount = taxAmount;
-      })
-      this.quoteService.grandtotal.subscribe(grandtotal => {
+      });
+      this.grandtotalSub = this.quoteService.grandtotal.subscribe(grandtotal => {
         this.grandTotal = grandtotal;
-      })
-      this.quoteService.calculateTax()
-      .subscribe(taxRate => {
-        this.quoteService.taxAmount.subscribe(taxAmount => {
+      });
+      this.quoteService.calculateTax().subscribe(taxRate => {
+        this.taxUpdateSub = this.quoteService.taxAmount.subscribe(taxAmount => {
           this.taxAmount = taxAmount;          
           this.grandTotal = this.taxAmount + this.subTotal;
-          this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
+          this.updateQuoteSub = this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
         });
       });
-      // this.taxAmount = 1;
-      // this.subTotal = this.quote[0].subTotal;
-      // this.grandTotal = this.taxAmount + this.subTotal;
     })
   }
 
   ionViewWillLeave() {
     if (this.quoteSub){
       this.quoteSub.unsubscribe();
+    }
+    if (this.taxSub){
+      this.taxSub.unsubscribe();
+    }
+    if (this.updateQuoteSub) {
+      this.quoteSub.unsubscribe();
+    }
+    if (this.grandtotalSub) {
+      this.grandtotalSub.unsubscribe();
+    }
+    if (this.taxUpdateSub){
+      this.taxUpdateSub.unsubscribe();
+    }
+    if (this.subtotalSub){
+      this.subtotalSub.unsubscribe();
+    }
+    if (this.quoteitemSub){
+      this.quoteitemSub.unsubscribe();
     }
   }
 

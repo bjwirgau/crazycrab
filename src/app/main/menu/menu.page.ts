@@ -3,6 +3,9 @@ import { MenuService } from './menu.service';
 import { MenuItem } from './menu-item.model';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-menu',
@@ -13,12 +16,14 @@ export class MenuPage implements OnInit, OnDestroy {
 
   menuItems: MenuItem[];
   private menuItemSub: Subscription;
+  private sendGrid;
   isLoading = false;
   
 
   constructor(
     private menuService: MenuService,
-    private router: Router
+    private router: Router,
+    private httpClient: HttpClient
   ) { }
 
   ngOnInit() {
