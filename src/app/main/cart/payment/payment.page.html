@@ -8,65 +8,7 @@
 </ion-header>
 
 <ion-content>
-  <!-- <ion-grid class="ion-no-padding">
-    <div *ngIf="loadedQuoteItems.length > 0">
-      <ion-row>
-        <ion-col>
-          <ion-list>
-            <div *ngFor="let quoteItem of loadedQuoteItems">
-              <ion-item>
-                <ion-thumbnail slot="start">
-                  <ion-img [src]="quoteItem.imageUrl"></ion-img>
-                </ion-thumbnail>
-                <ion-label class="ion-text-right">{{ quoteItem.itemName }}</ion-label>
-                <ion-label class="ion-text-right">{{ quoteItem.itemQuantity }}</ion-label>
-                <ion-label class="ion-text-right">{{ quoteItem.totalItemPrice | currency }}</ion-label>
-              </ion-item>
-              <ion-item lines="none" *ngFor="let options of quoteItem.itemOptions | keyvalue">
-                <ion-label>{{ options.key }}: {{ options.value }}</ion-label>
-              </ion-item>
-            </div>
-          </ion-list>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">
-          <ion-item lines="none">
-            <ion-text>Sub Total</ion-text>
-          </ion-item>
-        </ion-col>
-        <ion-col size="8">
-          <ion-item>{{loadedQuote.subTotal | currency}}</ion-item>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">
-          <ion-item lines="none">
-            <ion-text>Tax Amount</ion-text>
-          </ion-item>
-        </ion-col>
-        <ion-col size="8">
-          <ion-item>{{loadedQuote.taxAmount | currency}}</ion-item>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">
-          <ion-item lines="none">
-            <ion-text>Grand Total</ion-text>
-          </ion-item>
-        </ion-col>
-        <ion-col size="8">
-          <ion-item>{{loadedQuote.grandTotal | currency}}</ion-item>
-        </ion-col>
-      </ion-row>
-    </div>
-  </ion-grid> -->
-
   <form action="/" method="post" id="payment-form">
-    <!-- <div class="form-row">
-      <div id="card-element"></div>
-      <div id="card-errors" role="alert"></div>
-    </div> -->
     <div class="group">
       <label>
         <span>Card number</span>

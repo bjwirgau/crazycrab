@@ -32,4 +32,6 @@ config.xml
 /www
 /resources
 /ios
+/android
+/.gradle
 sendgrid.env
