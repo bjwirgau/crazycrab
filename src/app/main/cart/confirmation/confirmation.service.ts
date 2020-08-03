@@ -37,7 +37,7 @@ export class ConfirmationService {
             .set("orderItems", JSON.stringify(orderItems))
 
             return this.httpClient.get(
-              `${environment.firebase.localCloudFunctionsUrl}sendConfirmation`, {params}
+              `${environment.firebase.cloudFunctionsUrl}sendConfirmation`, {params}
             ).pipe(
               map(result => {
                 console.log(result);
