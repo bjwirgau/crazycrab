@@ -90,6 +90,8 @@ exports.sendConfirmation = functions.https.onRequest((request, response) => {
         }
     };
 
+    console.log(msg);
+
     sgMail.send(msg)
     .then(() => {
         console.log('Email Sent!')
