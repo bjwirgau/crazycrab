@@ -28,6 +28,9 @@ export class CartPage implements OnInit {
   private updateQuoteSub: Subscription;
   private subtotalSub: Subscription;
   private grandtotalSub: Subscription;
+  private deleteQuoteSubscription: Subscription;
+  private deleteQuoteItemSubscription: Subscription;
+  private quoteItemSubscription: Subscription;
   isLoading = false;
   taxRate: number;
   taxAmount: number;
@@ -52,7 +55,7 @@ export class CartPage implements OnInit {
   ngOnDestroy() {
     if(this.cartSub){
       this.cartSub.unsubscribe();
-    }    
+    }
   }
 
   ionViewWillEnter() {
@@ -64,7 +67,7 @@ export class CartPage implements OnInit {
       this.quoteItems = quoteItems;
     });
     this.quoteSub = this.quoteService.fetchQuote().subscribe(quote => {
-      if(!quote){
+      if(quote.length <= 0){
         return;
       }
       
@@ -95,7 +98,7 @@ export class CartPage implements OnInit {
     })
   }
 
-  ionViewWillLeave() {
+  ionViewDidLeave() {
     if (this.quoteSub){
       this.quoteSub.unsubscribe();
     }
@@ -116,6 +119,15 @@ export class CartPage implements OnInit {
     }
     if (this.quoteitemSub){
       this.quoteitemSub.unsubscribe();
+    }
+    if (this.deleteQuoteSubscription){
+      this.deleteQuoteSubscription.unsubscribe();
+    }
+    if (this.deleteQuoteItemSubscription){
+      this.deleteQuoteItemSubscription.unsubscribe();
+    }
+    if (this.quoteItemSubscription) {
+      this.quoteItemSubscription.unsubscribe();
     }
   }
 
@@ -161,29 +173,32 @@ export class CartPage implements OnInit {
   }
 
   onDeliveryButtonClick() {
-    let deliveryMethod = document.querySelector('#delivery-method').nodeValue;
-    console.log(deliveryMethod);
-    // this.quoteService.updateQuote(this.quote[0].subTotal, this.quote[0].taxRate, this.quote[0].taxAmount, )
     this.router.navigateByUrl('/main/tabs/cart/payment');
   }
 
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
-    this.quoteItemService.removeQuoteItem(id).subscribe(quoteItems => {
-      // this.quoteService.calculateTotals();
+    this.deleteQuoteItemSubscription = this.quoteItemService.removeQuoteItem(id).subscribe(() => {
       let amount = 0;
-      this.quoteItems.forEach(item => {
-          amount += item.totalItemPrice;
-      });
-      this.quoteService.updateTotals(amount);
-
-      this.quoteService.calculateTax()
-      .subscribe(taxAmount => {
-        this.quoteService.taxAmount.subscribe(taxAmount => {
-          this.taxAmount = taxAmount;
-          this.isTaxLoading = false;
-        });
-      });
+      this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
+        if (quoteItems.length <= 0){
+          this.deleteQuoteSubscription = this.quoteService.deleteQuote().subscribe();
+        } else {
+          quoteItems.forEach(item => {
+            amount += item.totalItemPrice;
+          });
+  
+          this.quoteService.updateTotals(amount);
+  
+          this.quoteService.calculateTax()
+          .subscribe(taxAmount => {
+            this.quoteService.taxAmount.subscribe(taxAmount => {
+              this.taxAmount = taxAmount;
+              this.isTaxLoading = false;
+            });
+          });
+        }
+      })
     });
   }
 

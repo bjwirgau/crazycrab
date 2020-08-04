@@ -261,8 +261,6 @@ export class QuoteService {
         throw new Error('Could not find user when clearing quote.');
       }
 
-      console.log("Deleting quote item");
-
       return this.httpClient
         .delete(`${environment.firebase.databaseURL}quote.json?customerId=${userId}`);
     })
