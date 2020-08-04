@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { QuoteService } from '../quote.service';
 import { AlertController } from '@ionic/angular';
@@ -21,7 +21,7 @@ const STRIPE_INVALID_REQUEST = "StripeInvalidRequestError";
   templateUrl: './payment.page.html',
   styleUrls: ['./payment.page.scss'],
 })
-export class PaymentPage implements OnInit {
+export class PaymentPage implements OnInit, OnDestroy {
   stripePublishableKey = 'pk_test_LSkBfYHvD6QFYTzCdiMbYCLI006yDnd6jL';
   stripe = Stripe(this.stripePublishableKey);
   isProcessing = false;
@@ -35,6 +35,7 @@ export class PaymentPage implements OnInit {
   private quoteSubscription: Subscription;
   private quoteItemSubscription: Subscription;
   private paymentSubscription: Subscription;
+  private removeQuoteItemSubscription: Subscription;
 
   cardBrandToPfClass = {
     'visa': 'pf-visa',
@@ -65,6 +66,15 @@ export class PaymentPage implements OnInit {
     this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.loadedQuoteItems = quoteItems;
     })
+  }
+
+  ngOnDestroy() {
+    if (this.quoteItemSubscription) {
+      this.quoteItemSubscription.unsubscribe();
+    }
+    if (this.removeQuoteItemSubscription) {
+      this.removeQuoteItemSubscription.unsubscribe();
+    }
   }
 
   setupStripe(){
@@ -178,7 +188,13 @@ export class PaymentPage implements OnInit {
               this.orderService.createOrderItems(self.loadedQuoteItems, orderId);
               this.orderService.fetchOrderItems(order[0].orderId).subscribe(() => {
                 //clear cart items
-                this.quoteItemService.clearQuoteItems().subscribe();
+
+                this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
+                  quoteItems.forEach(quoteItem => {
+                    this.removeQuoteItemSubscription = this.quoteItemService.removeQuoteItem(quoteItem.id).subscribe();
+                  });
+                });
+
                 this.quoteService.deleteQuote().subscribe();
 
                 this.orderService.orderComplete.next(true);

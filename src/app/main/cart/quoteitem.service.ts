@@ -194,21 +194,4 @@ export class QuoteitemService {
       })
     )
   }
-
-  clearQuoteItems(){
-    return this.accountService.userId.pipe(
-      take(1),
-      tap(userId => {
-        if(!userId){
-          throw new Error('User id not found after completing payment.');
-        }
-
-        this.quoteItems.subscribe(quoteItems => {
-          quoteItems.forEach(quoteItem => {
-            this.removeQuoteItem(quoteItem.id).subscribe();
-          })
-        })
-      })
-    )
-  }
 }
