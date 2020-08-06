@@ -101,13 +101,16 @@
             Store Location
           </ion-label>
         </ion-item-divider>
-        <ion-list>
+        <ion-list *ngIf="!isAccountLoading">
           <ion-item lines="none">
             <ion-label>Store</ion-label>
             <ion-select name="store" interface="popover" [value]="loadedAccountDetails[0].defaultStore">
               <ion-select-option [value]="location.storeId" [disabled]="!location.open" *ngFor="let location of loadedLocations">{{location.title}}</ion-select-option>
             </ion-select>
           </ion-item>
+        </ion-list>
+        <ion-list *ngIf="isAccountLoading">
+          <ion-spinner name="dots"></ion-spinner>
         </ion-list>
         <ion-item-divider color="primary">
           <ion-label>

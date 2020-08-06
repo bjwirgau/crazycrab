@@ -38,6 +38,7 @@ export class CartPage implements OnInit {
   private deleteQuoteItemSubscription: Subscription;
   private quoteItemSubscription: Subscription;
   isLoading = false;
+  isAccountLoading = false;
   taxRate: number;
   taxAmount: number;
   subTotal: number;
@@ -61,8 +62,10 @@ export class CartPage implements OnInit {
     this.locationService.fetchLocations().subscribe(locations => {
       this.loadedLocations = locations;
     });
+    this.isAccountLoading = true;
     this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
       this.loadedAccountDetails = accountDetails;
+      this.isAccountLoading = false;
     });
   }
 
