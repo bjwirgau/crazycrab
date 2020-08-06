@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { map, tap } from 'rxjs/operators';
-import { Globalization, GlobalizationOptions } from '@ionic-native/globalization/ngx';
 
 import { MenuItem } from './menu-item.model';
 
@@ -32,7 +31,6 @@ export class MenuService {
 
   constructor(
     private httpClient: HttpClient,
-    private globalization: Globalization
   ) { }
 
   get menuItems() {

@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 import { map, tap } from 'rxjs/operators';
 import { StoreLocation } from './location.model';
 import { BehaviorSubject } from 'rxjs';
+import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 interface StoreLocationData {
   id: string,

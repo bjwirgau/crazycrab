@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2 } fr
 import { LocationService } from './location.service';
 import { StoreLocation } from './location.model';
 import { MenuService } from '../menu/menu.service';
+import { Geolocation, Geoposition } from '@ionic-native/geolocation/ngx';
 
 @Component({
   selector: 'app-location',
@@ -21,7 +22,8 @@ export class LocationPage implements OnInit, AfterViewInit {
   constructor(
     private renderer: Renderer2,
     private locationService: LocationService,
-    private menuService: MenuService
+    private menuService: MenuService,
+    private geolocation: Geolocation
   ) {}
 
   ngOnInit() {
@@ -110,18 +112,19 @@ export class LocationPage implements OnInit, AfterViewInit {
   getDirections() {
     this.getGoogleMaps().then(googleMaps => {
       const mapEl = this.mapElementRef.nativeElement;
-      const southfieldLocation = new googleMaps.LatLng(this.storeLocations[0].coordinates['latitude'],this.storeLocations[0].coordinates['longitude'])
+      const southfieldLocation = new googleMaps.LatLng(this.storeLocations[0].coordinates['latitude'],this.storeLocations[0].coordinates['longitude']);
+      const directionsService = new googleMaps.DirectionsService();
+      const directionsRenderer = new googleMaps.DirectionsRenderer();
+
       const map = new googleMaps.Map(mapEl, {
         center: southfieldLocation,
         zoom: 17
       });
 
-      const directionsService = new googleMaps.DirectionsService();
-      const directionsRenderer = new googleMaps.DirectionsRenderer();
-      directionsRenderer.setMap(map);
-      const haight = new googleMaps.LatLng(37.7699298, -122.4469157);
+      this.geolocation.getCurrentPosition().then((currentLocation) => {
+        directionsRenderer.setMap(map);
       let request = {
-        origin: haight,
+        origin: new googleMaps.LatLng(currentLocation.coords.latitude, currentLocation.coords.longitude),
         destination: southfieldLocation,
         travelMode: googleMaps.TravelMode["DRIVING"]
       };
@@ -131,6 +134,11 @@ export class LocationPage implements OnInit, AfterViewInit {
           directionsRenderer.setDirections(response);
         }
       })
+      }).catch((err) => {
+        console.log('Error getting location.', err);
+      });
     })
   }
+
+
 }
