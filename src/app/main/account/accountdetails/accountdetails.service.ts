@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { tap, take, map, switchMap } from 'rxjs/operators';
+import { tap, take, map, switchMap, defaultIfEmpty } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { AccountDetails } from './accountdetails.model';
 import { AccountService } from '../account.service';
@@ -12,6 +12,7 @@ export interface AccountDetailData {
   email: string,
   firstname: string,
   lastname: string,
+  defaultStore: string
 }
 
 @Injectable({
@@ -58,7 +59,8 @@ export class AccountdetailsService {
                       key,
                       accountDetailData[key].email,
                       accountDetailData[key].firstname,
-                      accountDetailData[key].lastname
+                      accountDetailData[key].lastname,
+                      accountDetailData[key].defaultStore
                     )
                   );
                 }
@@ -115,5 +117,31 @@ export class AccountdetailsService {
     )
   }
 
-  
+  saveAccountDetails(
+    accountDetails: AccountDetails,
+    defaultStore: string
+  ) {
+    let account: AccountDetails;
+    return this.accountService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId){
+          throw new Error('Error saving account details. Failed to retrieve user ID.');
+        }
+
+        account = new AccountDetails(
+          userId,
+          accountDetails.email,
+          accountDetails.firstname,
+          accountDetails.lastname,
+          defaultStore
+        )
+
+        return this.httpClient.put<{key: string}>(
+          `${environment.firebase.databaseURL}accounts/${accountDetails.userId}.json`,
+          {...account, id: null}
+        );
+      })
+    )
+  }
 }

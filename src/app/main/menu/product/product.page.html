@@ -42,18 +42,6 @@
           </ion-col>
         </ion-row>
 
-        <!-- Product Options -->
-        <!-- <ion-row *ngFor="let option of productOptions">
-          <ion-col size="12" *ngIf="option.key !== 'price'">
-            <ion-item>
-              <ion-label>{{ option.label }}</ion-label>
-              <ion-select placeholder="Select One" [id]="option.id" [ngModel]="option.id" [name]="option.id" required #prepCtrl="ngModel" interface="popover" (ionChange)="addProductOption($event)">
-                <ion-select-option [value]="value.key" *ngFor="let value of option.values | keyvalue">{{ value.value.value }}</ion-select-option>
-              </ion-select>
-            </ion-item>
-          </ion-col>
-        </ion-row> -->
-
         <ion-row *ngFor="let options of productOptions">
           <ion-col size="6">
             {{ options.label }}
@@ -61,53 +49,15 @@
           <ion-col *ngFor="let option of options.values" size="2">
             <ion-icon name="football-outline" size="large" (click)="setProductOption(options, option.value)"></ion-icon>
             <ion-checkbox [id]="getOptionId(options.id, option.value)" class="product-option" [value]="option.value"></ion-checkbox>
-            <!-- <ion-item lines="none">
-              <ion-label>Option</ion-label>
-              <ion-icon name="football-outline" size="large" (click)="setProductOption(option)"></ion-icon>
-              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
-
-              <ion-icon name="baseball-outline" size="large" (click)="setProductOption(option.key)"></ion-icon>
-              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
-
-              <ion-icon name="american-football-outline" size="large" (click)="setProductOption(option.key)"></ion-icon>
-              <ion-checkbox [id]="option.key" class="product-option"></ion-checkbox>
-            </ion-item> -->
           </ion-col>
         </ion-row>
-        <!-- Product Quantity -->
-        <!-- <ion-row class="ion-justify-content-center ion-align-items-center ion-padding" style="height: 100%">
-          <ion-col size="5">
-            Quantity
-          </ion-col>
-          <ion-col size="2">
-            <ion-item lines="none">
-              <ion-icon name="remove-circle" color="tertiary" (click)="decrementQty()" size="large"></ion-icon>
-            </ion-item>
-          </ion-col>
-          <ion-col size="3">
-            <ion-item lines="none"> -->
-              <ion-input type="hidden" min="1" name="quantity" [value]="productQuantity" [(ngModel)]="productQuantity"></ion-input>
-            <!-- </ion-item>
-          </ion-col>
-          <ion-col size="2">
-            <ion-item lines="none">
-              <ion-icon name="add-circle" color="primary" (click)="incrementQty()" size="large"></ion-icon>
-            </ion-item>
-          </ion-col>
-        </ion-row> -->
-        <!-- Product Price -->
-        <!-- <ion-row class="ion-justify-content-center ion-align-items-center ion-padding" style="height: 100%">
-          <ion-col size="8">
-            Price
-          </ion-col>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <div>$</div>
-              <ion-input type="text" readonly name="currentPrice" [value]="product.price" [(ngModel)]="currentPrice"></ion-input>
-            </ion-item>
-          </ion-col>
-        </ion-row> -->
+        <ion-input type="hidden" min="1" name="quantity" [value]="productQuantity" [(ngModel)]="productQuantity"></ion-input>
       </ion-grid>
+
+      <ion-item *ngIf="isLunchMenuItems() && lunchAvailability" lines="none">
+        <ion-label class="ion-text-center warning-message">Lunch is available between {{getFormattedTime(lunchAvailability.start)}} to {{getFormattedTime(lunchAvailability.end)}}</ion-label>
+      </ion-item>
+
         <!-- Add to Cart -->
       <ion-grid>
         <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
@@ -117,8 +67,8 @@
         </ion-row>
         <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
           <ion-col class="ion-text-center">
-            <ion-button *ngIf="!isLoading" type="submit" color="primary" expand="block">Add to Cart</ion-button>
-            <ion-button *ngIf="isLoading" type="submit" disabled color="primary" expand="block">Add to Cart</ion-button>
+            <ion-button *ngIf="(!isLoading && !isLunchMenuItems()) || (isLunchTime() && isLunchMenuItems() && !isLoading)" type="submit" color="primary" expand="block">Add to Cart</ion-button>
+            <ion-button *ngIf="isLoading || (!isLoading && !isLunchTime() && isLunchMenuItems())" type="submit" disabled color="primary" expand="block">Add to Cart</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>

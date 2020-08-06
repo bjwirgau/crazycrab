@@ -39,7 +39,8 @@ export class SignupService {
           userId,
           email,
           firstname,
-          lastname
+          lastname,
+          ''
         )
 
         return this.httpClient.post<{key: string}>(

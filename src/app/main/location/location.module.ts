@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { LocationPageRoutingModule } from './location-routing.module';
 
 import { LocationPage } from './location.page';
+import { ExpandableComponent } from '../../components/expandable/expandable.component'
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { LocationPage } from './location.page';
     IonicModule,
     LocationPageRoutingModule
   ],
-  declarations: [LocationPage]
+  declarations: [LocationPage, ExpandableComponent]
 })
 export class LocationPageModule {}

@@ -8,6 +8,7 @@ import { NgForm, CheckboxRequiredValidator } from '@angular/forms';
 import { ProductOptionsService } from './product-options.service';
 import { QuoteService } from '../../cart/quote.service';
 import { QuoteitemService } from '../../cart/quoteitem.service';
+import { LunchAvailability } from '../lunch-availability.model';
 
 
 @Component({
@@ -18,6 +19,8 @@ import { QuoteitemService } from '../../cart/quoteitem.service';
 export class ProductPage implements OnInit, OnDestroy {
 
   productDetailSub: Subscription;
+  availabilitySubscription: Subscription;
+  lunchAvailability: LunchAvailability
 
   product: Product;
   productOptions: {};
@@ -35,14 +38,17 @@ export class ProductPage implements OnInit, OnDestroy {
   constructor(
     private productService: ProductService,
     private productOptionsService: ProductOptionsService,
-    private quoteService: QuoteService,
-    private quoteItemService: QuoteitemService,
     private activatedRoute: ActivatedRoute,
     private menuService: MenuService,
     private router: Router
   ) { }
 
   ngOnInit() {
+    this.availabilitySubscription = this.menuService.fetchLunchAvailability().subscribe(availability => {
+      console.log(availability);
+      this.lunchAvailability = availability;
+    });
+
     this.activatedRoute.paramMap.subscribe(paramMap => {
       if (!paramMap.has('productId')) {
         this.router.navigate(['/main/tabs/menu/']);
@@ -65,13 +71,16 @@ export class ProductPage implements OnInit, OnDestroy {
 
           this.isLoading = false;
         }
-        );
+      );
     });
   }
 
   ngOnDestroy(){
     if(this.productDetailSub){
       this.productDetailSub.unsubscribe();
+    }
+    if(this.availabilitySubscription){
+      this.availabilitySubscription.unsubscribe();
     }
     this.productOptionsService.clearOptions();
     this.productAdded = false;
@@ -188,6 +197,25 @@ export class ProductPage implements OnInit, OnDestroy {
       value = value.toString();
     }
     return value.replace(/ /g,'').toLowerCase();
+  }
+
+  isLunchMenuItems(): boolean {
+    return this.menuService.isLunchItems();
+  }
+
+  getFormattedTime(time: number): string {
+    return this.menuService.formatTime(time);
+  }
+
+  isLunchTime() {
+    let currentHour = new Date().getHours();
+
+    if (!this.menuService.lunchAvailability.getValue()){
+      return false;
+    }
+
+    return currentHour >= parseInt(this.menuService.lunchAvailability.getValue().start)/100
+        && currentHour <= parseInt(this.menuService.lunchAvailability.getValue().end)/100;
   }
 
 }

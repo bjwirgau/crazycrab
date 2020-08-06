@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title>confirmation</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -27,21 +27,26 @@
                 <b>{{ item.itemName }}</b>
             </ion-col>
           </ion-row>
+          <ion-row>
+            <ion-col>
+              Quantity: {{ item.itemQuantity }}
+            </ion-col>
+          </ion-row>
           <ion-row *ngFor="let option of item.itemOptions | keyvalue">
             <ion-col>
-                <div *ngIf="!isObject(option.value)">{{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}</div>
-                <div *ngIf="isObject(option.value)">
-                  <div *ngFor="let value of getValues(option.value)">
-                    {{ value }}
-                  </div>
+              <div *ngIf="!isObject(option.value)">{{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}</div>
+              <div *ngIf="isObject(option.value)">
+                <div *ngFor="let value of getValues(option.value)">
+                  {{ value }}
                 </div>
-              </ion-col>
+              </div>
+            </ion-col>
           </ion-row>
         </ion-grid>
       </ion-col>
       <ion-col>
-          <div style="float:right">{{ item.itemPrice | currency }}</div>
-        </ion-col>
+        <div style="float:right">{{ item.itemPrice | currency }}</div>
+      </ion-col>  
     </ion-row>
   </ion-grid>
   <hr style="color:white">

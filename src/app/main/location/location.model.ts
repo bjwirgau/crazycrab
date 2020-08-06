@@ -7,6 +7,8 @@ export class StoreLocation {
         public state: string,
         public zip: string,
         public hours: {},
-        public open: boolean
+        public open: boolean,
+        public expanded: boolean,
+        public storeId: number
     ) {}
 }

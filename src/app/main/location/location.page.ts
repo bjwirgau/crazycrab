@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { LocationService } from './location.service';
 import { StoreLocation } from './location.model';
+import { MenuService } from '../menu/menu.service';
 
 @Component({
   selector: 'app-location',
@@ -14,10 +15,25 @@ export class LocationPage implements OnInit, AfterViewInit {
   expanded: boolean = false;
   storeLocations: StoreLocation[];
 
+  public items: any = [];
+
   constructor(
     private renderer: Renderer2,
-    private locationService: LocationService
-  ) { }
+    private locationService: LocationService,
+    private menuService: MenuService
+  ) {
+    this.items = [
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false },
+      { expanded: false }
+    ];
+  }
 
   ngOnInit() {
     this.loading = true;
@@ -26,7 +42,6 @@ export class LocationPage implements OnInit, AfterViewInit {
     });
 
     this.locationService.storeLocations.subscribe(locations => {
-      console.log("Store Locations", locations);
       this.storeLocations = locations;
     });
   }
@@ -76,4 +91,25 @@ export class LocationPage implements OnInit, AfterViewInit {
     })
   }
 
+  expandItem(item, event): void {
+    if (event.srcElement.id === "directions"){
+      return;
+    }
+    if (item.expanded) {
+      item.expanded = false;
+    } else {
+      this.storeLocations.map(listItem => {
+        if (item == listItem) {
+          listItem.expanded = !listItem.expanded;
+        } else {
+          listItem.expanded = false;
+        }
+        return listItem;
+      });
+    }
+  }
+
+  getFormattedTime(time: number): string {
+    return this.menuService.formatTime(time);
+  }
 }

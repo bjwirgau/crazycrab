@@ -13,7 +13,9 @@ interface StoreLocationData {
   state: string,
   zip: string,
   hours: {},
-  open: boolean
+  open: boolean,
+  expanded: boolean,
+  storeId: number
 }
 
 @Injectable({
@@ -33,7 +35,7 @@ export class LocationService {
 
   fetchLocations() {
     return this.httpClient
-      .get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-addresses.json`)
+      .get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-configuration/store-addresses.json`)
       .pipe(map(resData => {
         const storeLocations = [];
         for (const key in resData){
@@ -46,7 +48,9 @@ export class LocationService {
               resData[key].state,
               resData[key].zip,
               resData[key].hours,
-              resData[key].open
+              resData[key].open,
+              resData[key].expanded,
+              resData[key].storeId
             ))
           }
         }

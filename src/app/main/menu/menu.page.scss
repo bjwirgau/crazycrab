@@ -2,3 +2,11 @@ ion-thumbnail {
     width: 100px;
     height: 100px;
 }
+
+.warning-message {
+    background-color: var(--ion-color-warning);
+}
+
+.warning-container {
+    display: inline-block;
+}

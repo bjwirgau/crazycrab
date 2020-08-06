@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SegmentChangeEventDetail } from '@ionic/core';
 import { AccountService } from '../account.service';
 import { AccountDetails } from './accountdetails.model';
@@ -8,37 +8,63 @@ import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { OrderdetailsComponent } from './orderdetails/orderdetails.component'
 import { OrderService } from '../../cart/order.service';
+import { LocationService } from '../../location/location.service';
+import { NgForm } from '@angular/forms';
+import { StoreLocation } from '../../location/location.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-accountdetails',
   templateUrl: './accountdetails.page.html',
   styleUrls: ['./accountdetails.page.scss'],
 })
-export class AccountdetailsPage implements OnInit {
+export class AccountdetailsPage implements OnInit, OnDestroy {
   loadedAccountDetails: AccountDetails[];
   loadedOrders: Order[];
+  loadedLocations: StoreLocation[];
   isLoading = false;
+  updating = false;
+  updated = false;
   accountView:string = 'general';
+  compareWith: any;
+  defaultLocation:string;
+
+  accountDetailsSubscription: Subscription;
+  saveAccountSubscription: Subscription;
 
   constructor(
     private accountService: AccountService,
     private accountDetailService: AccountdetailsService,
-    private orderService: OrderService, 
+    private locationService: LocationService, 
     private router: Router,
     private modalController: ModalController
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.compareWith = this.compareWithFn;
+  }
+  ngOnDestroy() {
+    if (this.accountDetailsSubscription){
+      this.accountDetailsSubscription.unsubscribe();
+    }
+    if (this.saveAccountSubscription){
+      this.saveAccountSubscription.unsubscribe();
+    }
+  }
 
   ionViewWillEnter() {
     this.isLoading = true;
     this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
       this.loadedAccountDetails = accountDetails;
+      this.defaultLocation = accountDetails[0].defaultStore;
       this.isLoading = false;
     });
     this.accountDetailService.fetchOrderHistory().subscribe(orders => {
-      this.loadedOrders = orders;
-    })
+      this.loadedOrders = orders.sort((a,b) => (a.orderId < b.orderId) ? 1 : -1);
+    });
+    this.locationService.fetchLocations().subscribe(locations => {
+      this.loadedLocations = locations;
+    });
   }
 
   logout() {
@@ -79,6 +105,37 @@ export class AccountdetailsPage implements OnInit {
       .then(modalEl => {
         modalEl.present();
       })
+  }
+
+  onSubmit(form: NgForm) {
+    if (!form.valid) {
+      return;
+    }
+    
+    const defaultStore = form.value.store;
+    
+    this.updating = true;
+    this.accountDetailsSubscription = this.accountDetailService.accountdetails.subscribe(accountDetails => {
+      if (accountDetails){
+        this.saveAccountSubscription = this.accountDetailService.saveAccountDetails(accountDetails[0], defaultStore).subscribe(() => {
+          this.updating = false;
+          this.updated = true;
+          this.delay(2000).then(() => {
+            this.updated = false;
+          })
+        });
+      }
+    });
+    
+  }
+
+  compareWithFn(l1, l2) {
+    // return l1 && l2 ? l1.storeId == l2.storeId : l1 == l2;
+    return l1 == l2;
+  };
+
+  delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms));
   }
 
 }

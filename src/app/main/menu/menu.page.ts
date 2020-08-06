@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MenuService } from './menu.service';
 import { MenuItem } from './menu-item.model';
-import { Subscription } from 'rxjs';
+import { Subscription, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-import { map } from 'rxjs/operators';
+import { LunchAvailability } from './lunch-availability.model';
 
 @Component({
   selector: 'app-menu',
@@ -14,9 +13,11 @@ import { map } from 'rxjs/operators';
 })
 export class MenuPage implements OnInit, OnDestroy {
 
+  _currentCategory = new BehaviorSubject<string>('');
+  lunchAvailability: LunchAvailability;
   menuItems: MenuItem[];
   private menuItemSub: Subscription;
-  private sendGrid;
+  private availabilitySubscription: Subscription;
   isLoading = false;
   
 
@@ -31,6 +32,10 @@ export class MenuPage implements OnInit, OnDestroy {
       this.menuItems = menuItems
     });
 
+    this.availabilitySubscription = this.menuService.fetchLunchAvailability().subscribe(availability => {
+      this.lunchAvailability = availability;
+    });
+
     this.isLoading = true;
     this.menuService.fetchMenuItems().subscribe(() => {
       this.isLoading = false;
@@ -40,6 +45,9 @@ export class MenuPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.menuItemSub){
       this.menuItemSub.unsubscribe();
+    }
+    if (this.availabilitySubscription) {
+      this.availabilitySubscription.unsubscribe();
     }
   }
 
@@ -52,6 +60,7 @@ export class MenuPage implements OnInit, OnDestroy {
       case 'category':
         this.isLoading = true;
         this.menuService.fetchMenuItems(category).subscribe(menuItems => {
+          this.menuService.currentCategory.next(category);
           this.menuItems = menuItems;
           this.menuService.addMenuHistory(category);
           this.isLoading = false;
@@ -74,9 +83,18 @@ export class MenuPage implements OnInit, OnDestroy {
       previous = 'menu';
     }
     this.menuService.fetchMenuItems(previous).subscribe(menuItems => {
+      this.menuService.currentCategory.next(previous);
       this.menuItems = menuItems;
       this.menuService.removeMenuHistory();
       this.isLoading = false;
     })
+  }
+
+  validateLunchMenuItems(): boolean {
+    return this.menuService.isLunchItems();
+  }
+
+  getFormattedTime(time: number): string {
+    return this.menuService.formatTime(time);
   }
 }
