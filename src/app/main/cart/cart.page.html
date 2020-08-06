@@ -77,22 +77,7 @@
                   </ion-grid>
                 </ion-col>
               </ion-row>
-            </ion-grid>
-           
-            <!-- <ion-label>
-              <h3 class="cart-item"><b>{{ quoteItem.itemName }}</b></h3>
-              <p class="cart-item">{{ quoteItem.itemPrice | currency }}</p><br>
-              <div class="cart-item-options" *ngFor="let option of quoteItem.itemOptions | keyvalue">
-                <div *ngIf="!isObject(option.value)">{{ option.key.charAt(0).toUpperCase() + option.key.slice(1) }}: {{ option.value }}</div>
-                <div *ngIf="isObject(option.value)">
-                  <div *ngFor="let value of getValues(option.value)">
-                    {{ value }}
-                  </div>
-                </div>
-              </div>
-            </ion-label> -->
-            
-            
+            </ion-grid>  
           </ion-item>
           <ion-item-options>
             <ion-item-option color="danger" (click)="deleteCartItem(quoteItem.id)">
@@ -109,6 +94,19 @@
           <ion-item class="delivery-method" id="delivery-method" lines="none">
             <ion-label>Pickup</ion-label>
             <ion-checkbox slot="end" value="pickup" checked="true" disabled></ion-checkbox>
+          </ion-item>
+        </ion-list>
+        <ion-item-divider color="primary">
+          <ion-label>
+            Store Location
+          </ion-label>
+        </ion-item-divider>
+        <ion-list>
+          <ion-item lines="none">
+            <ion-label>Store</ion-label>
+            <ion-select name="store" interface="popover" [value]="loadedAccountDetails[0].defaultStore">
+              <ion-select-option [value]="location.storeId" [disabled]="!location.open" *ngFor="let location of loadedLocations">{{location.title}}</ion-select-option>
+            </ion-select>
           </ion-item>
         </ion-list>
         <ion-item-divider color="primary">

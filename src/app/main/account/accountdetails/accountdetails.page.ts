@@ -43,14 +43,8 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.compareWith = this.compareWithFn;
   }
-  ngOnDestroy() {
-    if (this.accountDetailsSubscription){
-      this.accountDetailsSubscription.unsubscribe();
-    }
-    if (this.saveAccountSubscription){
-      this.saveAccountSubscription.unsubscribe();
-    }
-  }
+
+  ngOnDestroy(){}
 
   ionViewWillEnter() {
     this.isLoading = true;
@@ -65,6 +59,15 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
     this.locationService.fetchLocations().subscribe(locations => {
       this.loadedLocations = locations;
     });
+  }
+
+  ionViewWillLeave() {
+    if (this.accountDetailsSubscription){
+      this.accountDetailsSubscription.unsubscribe();
+    }
+    if (this.saveAccountSubscription){
+      this.saveAccountSubscription.unsubscribe();
+    }
   }
 
   logout() {

@@ -11,6 +11,10 @@ import { QuoteService } from './quote.service';
 import { Quote } from './quote.model';
 import { flatMap, tap, take, map } from 'rxjs/operators';
 import { ProductService } from '../menu/product/product.service';
+import { LocationService } from '../location/location.service';
+import { StoreLocation } from '../location/location.model';
+import { AccountdetailsService } from '../account/accountdetails/accountdetails.service';
+import { AccountDetails } from '../account/accountdetails/accountdetails.model';
 
 @Component({
   selector: 'app-cart',
@@ -20,6 +24,8 @@ import { ProductService } from '../menu/product/product.service';
 export class CartPage implements OnInit {
   quoteItems: QuoteItem[];
   quote: Quote[];
+  loadedLocations: StoreLocation[];
+  loadedAccountDetails: AccountDetails[];
   private cartSub: Subscription;
   private quoteSub: Subscription;
   private quoteitemSub: Subscription;
@@ -43,12 +49,20 @@ export class CartPage implements OnInit {
     private quoteService: QuoteService,
     private loadingCtrl: LoadingController,
     private router: Router,
-    private productService: ProductService
+    private productService: ProductService,
+    private locationService: LocationService,
+    private accountDetailService: AccountdetailsService
   ) { }
 
   ngOnInit() {
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
+    });
+    this.locationService.fetchLocations().subscribe(locations => {
+      this.loadedLocations = locations;
+    });
+    this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
+      this.loadedAccountDetails = accountDetails;
     });
   }
 
