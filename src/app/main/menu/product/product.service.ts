@@ -88,10 +88,10 @@ export class ProductService {
           )
         } else {
           this.quoteService.updateQuote(
-            totalProductPrice,
-            0,
-            0,
-            ''
+            quote[0].subTotal+totalProductPrice,
+            quote[0].taxRate,
+            quote[0].taxAmount,
+            quote[0].deliveryMethod
           ).subscribe(
             quote => {
               this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {

@@ -167,7 +167,6 @@ export class ProductPage implements OnInit, OnDestroy {
   }
 
   setProductOption(option, optionValue){
-    console.log(option);
     optionValue = this.convertIdValue(optionValue);
     const checkEl = document.querySelector(`#${option.id}-${optionValue}`);
     const allCheckEls = document.querySelectorAll(`[id^="${option.id}"]`);

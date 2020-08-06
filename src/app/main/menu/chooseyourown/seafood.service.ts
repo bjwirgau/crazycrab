@@ -94,8 +94,6 @@ export class SeafoodService {
       customizedSeafood[seafoodIndex] = newSeafood;
       this._customizedSeafood.next(customizedSeafood);
     }
-
-    console.log(this._customizedSeafood.getValue());
   }
 
   removeSeafood(customSeafood: Seafood){

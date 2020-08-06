@@ -163,7 +163,7 @@ export class QuoteService {
   }
 
   updateQuote(
-    totalProductPrice: number, 
+    subtotal: number, 
     taxRate: number, 
     taxAmount: number,
     deliveryMethod: string
@@ -172,7 +172,7 @@ export class QuoteService {
     return this.quote.pipe(
       take(1),
       switchMap(quote => {
-        let subtotal = quote.subTotal + totalProductPrice;
+        // let subtotal = quote.subTotal + totalProductPrice;
         let grandtotal = subtotal + taxAmount;
 
         updatedQuote = new Quote(
@@ -219,8 +219,9 @@ export class QuoteService {
     this._subtotal.next(subtotal);
     if (this._taxRate.getValue()){
       this._taxAmount.next(subtotal * this._taxRate.getValue()['rate']['stateUseTax']);
+      this._grandTotal.next(subtotal + this._taxAmount.getValue());
+      // this.updateQuote(subtotal, this._taxRate.getValue().rate.stateUseTax, this._taxAmount.getValue(), this._quote.getValue().deliveryMethod).subscribe()  ;
     }
-    this._grandTotal.next(subtotal + this._taxAmount.getValue());
   }
 
   calculateTax(zip: string = '48033'){

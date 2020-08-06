@@ -30,7 +30,6 @@ export class ProductOptionsService {
     options.forEach(option => {
       this.createOption(option[0], option[1]["label"], option[1]["values"])
     });
-    console.log("Initialized Product Options", this.productOptions);
   }
 
   /**

@@ -9,7 +9,6 @@ import { QuoteitemService } from './quoteitem.service';
 import { QuoteItem } from './quoteitem.model';
 import { QuoteService } from './quote.service';
 import { Quote } from './quote.model';
-import { flatMap, tap, take, map } from 'rxjs/operators';
 import { ProductService } from '../menu/product/product.service';
 import { LocationService } from '../location/location.service';
 import { StoreLocation } from '../location/location.model';
@@ -41,7 +40,7 @@ export class CartPage implements OnInit {
   isAccountLoading = false;
   taxRate: number;
   taxAmount: number;
-  subTotal: number;
+  subtotal: number;
   grandTotal: number = 0;
   isTaxLoading: boolean;
 
@@ -97,10 +96,12 @@ export class CartPage implements OnInit {
       this.quoteService.updateTotals(amount);
 
       this.subtotalSub = this.quoteService.subtotal.subscribe(subtotal => {
-        this.subTotal = subtotal;
+        this.subtotal = subtotal;
+        this.updateQuoteSub = this.quoteService.updateQuote(subtotal, this.taxRate, this.taxAmount, '').subscribe();
       });
       this.taxSub = this.quoteService.taxAmount.subscribe(taxAmount => {
         this.taxAmount = taxAmount;
+        this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.taxRate, taxAmount, '').subscribe();
       });
       this.grandtotalSub = this.quoteService.grandtotal.subscribe(grandtotal => {
         this.grandTotal = grandtotal;
@@ -108,8 +109,8 @@ export class CartPage implements OnInit {
       this.quoteService.calculateTax().subscribe(taxRate => {
         this.taxUpdateSub = this.quoteService.taxAmount.subscribe(taxAmount => {
           this.taxAmount = taxAmount;          
-          this.grandTotal = this.taxAmount + this.subTotal;
-          this.updateQuoteSub = this.quoteService.updateQuote(0, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
+          this.grandTotal = this.taxAmount + this.subtotal;
+          this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
         });
       });
     })
