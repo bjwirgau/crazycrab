@@ -75,7 +75,6 @@ export class ProductService {
       quote => {
         if (quote.length === 0){
           this.quoteService.createQuote(totalProductPrice).subscribe(quote => {
-              console.log("New Quote", quote);
               this.quoteItemService.saveQuoteItem(
                 productId,
                 productName,

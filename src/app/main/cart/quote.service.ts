@@ -109,7 +109,6 @@ export class QuoteService {
 
         quote.userId = userId;
 
-        console.log("Creating qoute...");
         return this.httpClient.post<{ id: string }>(
           `${environment.firebase.databaseURL}quote.json`, 
           {...quote, id: null}

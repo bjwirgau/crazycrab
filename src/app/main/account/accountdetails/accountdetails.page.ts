@@ -98,8 +98,6 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
   }
 
   onOrderDetailsView(order: Order){
-    console.log(`Viewing order details for ${order.orderId}`);
-    // let orderItems = this.orderService.
     this.modalController
       .create({
         component: OrderdetailsComponent,

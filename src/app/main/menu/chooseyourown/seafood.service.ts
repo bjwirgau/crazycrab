@@ -72,7 +72,6 @@ export class SeafoodService {
     imageUrl: string
   ){
     const customizedSeafood = this._customizedSeafood.getValue();
-    console.log(this._customizedSeafood.getValue());
 
     const newSeafood = new CustomizedSeafood(
       id,

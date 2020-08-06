@@ -45,7 +45,6 @@ export class ProductPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.availabilitySubscription = this.menuService.fetchLunchAvailability().subscribe(availability => {
-      console.log(availability);
       this.lunchAvailability = availability;
     });
 
@@ -124,7 +123,6 @@ export class ProductPage implements OnInit, OnDestroy {
   addItemToCart(form: NgForm) {
     let errors = false;
     this.isLoading = true;
-    console.log(form);
 
     if (!form.value['quantity']){
       errors = true;

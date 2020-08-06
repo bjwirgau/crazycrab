@@ -94,14 +94,11 @@ export class ChooseyourownPage implements OnInit {
       let weightEl = <HTMLInputElement>document.getElementById(inputId);
       let weight = weightEl.value;
       let subtotalEl = <HTMLInputElement>document.getElementById(inputId+"-subtotal");
-      if (parseFloat(weight) < 0 || !weight){
+      if (parseFloat(weight) <= 0 || !weight){
         return;
       }
 
       weightEl.value = (parseFloat(weight)-0.5).toFixed(1);
-      // if (parseFloat(weightEl.value) === 0){
-      //   this.seafoodService.removeSeafood(seafood);
-      // }
       let subtotal = (parseFloat(weightEl.value)*parseFloat(seafood.price)).toFixed(2);
       subtotalEl.value = '$'+subtotal;
       this.seafoodService.updateSeafood(inputId, seafood.name, weightEl.value, seafood.price, subtotal, seafood.imageUrl);

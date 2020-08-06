@@ -155,7 +155,6 @@ export class CartPage implements OnInit {
   }
 
   addQuantity(quoteItem: QuoteItem) {
-    console.log("Adding Item", quoteItem);
     this.productService.addItemToCart(
       quoteItem.itemId,
       quoteItem.itemName,
@@ -175,7 +174,6 @@ export class CartPage implements OnInit {
 
   decrementQuantity(quoteItem: QuoteItem) {
     if (quoteItem.itemQuantity > 1){
-      console.log("Removing Single Item", quoteItem);
       this.productService.decrementItemFromCart(quoteItem)
 
       let amount = 0;

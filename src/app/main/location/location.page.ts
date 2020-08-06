@@ -14,6 +14,7 @@ export class LocationPage implements OnInit, AfterViewInit {
   loading: boolean = false;
   expanded: boolean = false;
   storeLocations: StoreLocation[];
+  map: any;
 
   public items: any = [];
 
@@ -21,19 +22,7 @@ export class LocationPage implements OnInit, AfterViewInit {
     private renderer: Renderer2,
     private locationService: LocationService,
     private menuService: MenuService
-  ) {
-    this.items = [
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false },
-      { expanded: false }
-    ];
-  }
+  ) {}
 
   ngOnInit() {
     this.loading = true;
@@ -53,9 +42,10 @@ export class LocationPage implements OnInit, AfterViewInit {
   ngAfterViewInit(){
     this.getGoogleMaps().then(googleMaps => {
       const mapEl = this.mapElementRef.nativeElement;
+      const southfieldLocation = new googleMaps.LatLng(this.storeLocations[0].coordinates['latitude'],this.storeLocations[0].coordinates['longitude'])
       const map = new googleMaps.Map(mapEl, {
-        center: {lat: 42.47358466, lng: -83.28482151 },
-        zoom: 19
+        center: southfieldLocation,
+        zoom: 17
       });
 
       googleMaps.event.addListenerOnce(map, 'idle', () => {
@@ -111,5 +101,36 @@ export class LocationPage implements OnInit, AfterViewInit {
 
   getFormattedTime(time: number): string {
     return this.menuService.formatTime(time);
+  }
+
+  setPosition() {
+
+  }
+
+  getDirections() {
+    this.getGoogleMaps().then(googleMaps => {
+      const mapEl = this.mapElementRef.nativeElement;
+      const southfieldLocation = new googleMaps.LatLng(this.storeLocations[0].coordinates['latitude'],this.storeLocations[0].coordinates['longitude'])
+      const map = new googleMaps.Map(mapEl, {
+        center: southfieldLocation,
+        zoom: 17
+      });
+
+      const directionsService = new googleMaps.DirectionsService();
+      const directionsRenderer = new googleMaps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+      const haight = new googleMaps.LatLng(37.7699298, -122.4469157);
+      let request = {
+        origin: haight,
+        destination: southfieldLocation,
+        travelMode: googleMaps.TravelMode["DRIVING"]
+      };
+
+      directionsService.route(request, function(response, status) {
+        if (status == 'OK'){
+          directionsRenderer.setDirections(response);
+        }
+      })
+    })
   }
 }

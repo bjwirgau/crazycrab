@@ -9,6 +9,8 @@ export class StoreLocation {
         public hours: {},
         public open: boolean,
         public expanded: boolean,
-        public storeId: number
+        public storeId: number,
+        public phonenumber: string,
+        public coordinates: {}
     ) {}
 }

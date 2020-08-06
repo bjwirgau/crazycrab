@@ -17,9 +17,10 @@
           <ion-col size="5" offset="1">
             {{ location.street }}<br>
             {{ location.city }}, {{ location.state }} {{ location.zip }}<br>
+            {{ location.phonenumber }}
           </ion-col>
           <ion-col size="6">
-            <ion-button id="directions"type="button" color="secondary" expand="block" size="small">Directions</ion-button>
+            <ion-button id="directions"type="button" color="secondary" expand="block" size="small" (click)="getDirections()">Directions</ion-button>
           </ion-col>
         </ion-row>
         <div ngFor="let location of storeLocations">

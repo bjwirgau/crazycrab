@@ -15,7 +15,9 @@ interface StoreLocationData {
   hours: {},
   open: boolean,
   expanded: boolean,
-  storeId: number
+  storeId: number,
+  phonenumber: string,
+  coordinates: {}
 }
 
 @Injectable({
@@ -50,7 +52,9 @@ export class LocationService {
               resData[key].hours,
               resData[key].open,
               resData[key].expanded,
-              resData[key].storeId
+              resData[key].storeId,
+              resData[key].phonenumber,
+              resData[key].coordinates
             ))
           }
         }
