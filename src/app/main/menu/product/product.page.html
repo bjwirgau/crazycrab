@@ -42,7 +42,7 @@
           </ion-col>
         </ion-row>
 
-        <ion-row *ngFor="let options of productOptions">
+        <ion-row [class]="'product-options-'+options.label.toLowerCase()" *ngFor="let options of productOptions">
           <ion-col size="6">
             {{ options.label }}
           </ion-col>
@@ -60,6 +60,11 @@
 
         <!-- Add to Cart -->
       <ion-grid>
+        <ion-row *ngFor="let invalidOptionLabel of invalidOptionLabels">
+          <ion-col class="ion-text-center">
+            <ion-label color="danger">Please select your {{invalidOptionLabel}}</ion-label>
+          </ion-col>
+        </ion-row>
         <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
           <ion-col class="ion-text-center ion-no-padding">
             <ion-label *ngIf="productAdded" color="success">Added to Cart</ion-label>

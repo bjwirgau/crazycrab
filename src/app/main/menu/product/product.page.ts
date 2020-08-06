@@ -1,14 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from './product.service';
-import { Subscription, BehaviorSubject } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { MenuService } from '../menu.service';
 import { Product } from './product.model';
-import { NgForm, CheckboxRequiredValidator } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 import { ProductOptionsService } from './product-options.service';
-import { QuoteService } from '../../cart/quote.service';
-import { QuoteitemService } from '../../cart/quoteitem.service';
 import { LunchAvailability } from '../lunch-availability.model';
+import { ProductOption } from './product-options.model';
 
 
 @Component({
@@ -30,10 +29,11 @@ export class ProductPage implements OnInit, OnDestroy {
   prices: [];
   priceIndex = 0;
 
-  loadedProductOptions = [];
-
   isLoading = false;
+  isAddingToCart = false;
   productAdded = false;
+  invalidOptions = false;
+  invalidOptionLabels:string[] = [];
 
   constructor(
     private productService: ProductService,
@@ -122,7 +122,16 @@ export class ProductPage implements OnInit, OnDestroy {
    */
   addItemToCart(form: NgForm) {
     let errors = false;
-    this.isLoading = true;
+    this.productAdded = false;
+    this.invalidOptionLabels = [];
+
+    if (!this.validateProductOptions()){
+      this.invalidOptions = true;
+      return;
+    }
+    this.invalidOptions = false;
+
+    this.isAddingToCart = true;
 
     if (!form.value['quantity']){
       errors = true;
@@ -141,13 +150,13 @@ export class ProductPage implements OnInit, OnDestroy {
     const totalPrice = parseFloat((price * quantity).toFixed(2));
     const imageUrl = form.value['product']['imageUrl'];
 
-    const productOptions = document.querySelectorAll('ion-checkbox[checked=true]');
+    const productOptionValues = document.querySelectorAll('ion-checkbox[checked=true]');
 
     let quoteItemOptions: {} = {};
     // this.productOptionsService.options.forEach(option => {
     //   quoteItemOptions[option.id] = option.values[form.value[option.id]]['value'];
     // })
-    productOptions.forEach(option => {
+    productOptionValues.forEach(option => {
       const optionKey = option.id.split("-")[0];
       const optionValue = option.id.split("-")[1];
       quoteItemOptions[optionKey] = optionValue;
@@ -213,6 +222,18 @@ export class ProductPage implements OnInit, OnDestroy {
 
     return currentHour >= parseInt(this.menuService.lunchAvailability.getValue().start)/100
         && currentHour <= parseInt(this.menuService.lunchAvailability.getValue().end)/100;
+  }
+
+  validateProductOptions(): boolean {
+    const productOptions: ProductOption[] = Object.values(this.productOptions);
+    productOptions.forEach(option => {
+      const optionEl = document.querySelectorAll(`.product-options-${option.id} > ion-col > ion-checkbox[checked=true]`);
+      if (optionEl.length == 0){
+        this.invalidOptionLabels.push(option.label);
+      }
+    });
+
+    return this.invalidOptionLabels.length > 0 ? false: true;
   }
 
 }
