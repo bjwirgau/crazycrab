@@ -6,8 +6,7 @@ import { AccountdetailsService } from './accountdetails.service';
 import { Order } from '../../cart/order.model';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
-import { OrderdetailsComponent } from './orderdetails/orderdetails.component'
-import { OrderService } from '../../cart/order.service';
+import { OrderdetailsComponent } from './orderdetails/orderdetails.component';
 import { LocationService } from '../../location/location.service';
 import { NgForm } from '@angular/forms';
 import { StoreLocation } from '../../location/location.model';
@@ -30,7 +29,11 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
   defaultLocation:string;
 
   accountDetailsSubscription: Subscription;
+  fetchAccountSubscription: Subscription;
+  fetchOrderHistorySubscription: Subscription;
+  locationSubscription: Subscription;
   saveAccountSubscription: Subscription;
+
 
   constructor(
     private accountService: AccountService,
@@ -48,31 +51,29 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
 
   ionViewWillEnter() {
     this.isLoading = true;
-    this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
+    this.fetchAccountSubscription = this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
       this.loadedAccountDetails = accountDetails;
       this.defaultLocation = accountDetails[0].defaultStore;
       this.isLoading = false;
     });
-    this.accountDetailService.fetchOrderHistory().subscribe(orders => {
+    this.fetchOrderHistorySubscription = this.accountDetailService.fetchOrderHistory().subscribe(orders => {
       this.loadedOrders = orders.sort((a,b) => (a.orderId < b.orderId) ? 1 : -1);
     });
-    this.locationService.fetchLocations().subscribe(locations => {
+    this.locationSubscription = this.locationService.fetchLocations().subscribe(locations => {
       this.loadedLocations = locations;
     });
   }
 
   ionViewWillLeave() {
-    if (this.accountDetailsSubscription){
-      this.accountDetailsSubscription.unsubscribe();
-    }
-    if (this.saveAccountSubscription){
-      this.saveAccountSubscription.unsubscribe();
-    }
+    this.clearSubscripitions();
   }
 
   logout() {
+    this.clearSubscripitions();
     this.accountService.logout();
-    this.router.navigateByUrl('/main/tabs/account');
+    this.router.navigateByUrl('/main/tabs/account').then(() =>
+      window.location.reload()
+    );
   }
 
   onSegmentChange(event: CustomEvent<SegmentChangeEventDetail>){
@@ -128,6 +129,24 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
       }
     });
     
+  }
+
+  clearSubscripitions(){
+    if (this.accountDetailsSubscription){
+      this.accountDetailsSubscription.unsubscribe();
+    }
+    if (this.saveAccountSubscription){
+      this.saveAccountSubscription.unsubscribe();
+    }
+    if (this.fetchAccountSubscription){
+      this.fetchAccountSubscription.unsubscribe();
+    }
+    if (this.fetchOrderHistorySubscription){
+      this.fetchOrderHistorySubscription.unsubscribe();
+    }
+    if (this.locationSubscription){
+      this.locationSubscription.unsubscribe();
+    }
   }
 
   compareWithFn(l1, l2) {

@@ -14,10 +14,6 @@ const routes: Routes = [
     loadChildren: () => import('./signup/signup.module').then( m => m.SignupPageModule)
   },
   {
-    path: 'signup',
-    loadChildren: () => import('./signup/signup.module').then( m => m.SignupPageModule)
-  },
-  {
     path: 'accountdetails',
     loadChildren: () => import('./accountdetails/accountdetails.module').then( m => m.AccountdetailsPageModule),
     canLoad: [AccountGuard]
