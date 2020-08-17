@@ -5,8 +5,9 @@ import { MenuItem } from './menu-item.model';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { LunchAvailability } from './lunch-availability.model';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 interface MenuData {
   title: string,
@@ -31,7 +32,8 @@ export class MenuService {
 
   constructor(
     private httpClient: HttpClient,
-  ) { }
+    private db: AngularFirestore
+  ) {}
 
   get menuItems() {
     return this._menuItems.asObservable();
@@ -45,15 +47,15 @@ export class MenuService {
     return this._lunchAvailability;
   }
 
-  fetchMenuItems(category: string = 'menu') {
-    return this.httpClient
-      .get<{[key: string]: MenuData }>(`${environment.firebase.databaseURL}${category}.json`)
-      .pipe(map(resData => {
+  fetchMenuItems(category: string = 'menu'): Observable<any> {
+    return this.db.collection<MenuItem>(category).valueChanges()
+      .pipe(
+        map(resData => {
         const menuItems = [];
         for (const key in resData){
           if (resData.hasOwnProperty(key)){
             menuItems.push(new MenuItem(
-              key,
+              resData[key].id,
               resData[key].title,
               resData[key].imageUrl,
               resData[key].type
@@ -63,10 +65,10 @@ export class MenuService {
 
         return menuItems;
       }),
-      tap(menuItems => {
-        this._menuItems.next(menuItems);
-      })
-    );
+        tap(menuItems => {
+          this._menuItems.next(menuItems);
+        })
+      );
   }
 
   fetchLunchAvailability() {

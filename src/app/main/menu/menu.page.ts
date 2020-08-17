@@ -40,6 +40,7 @@ export class MenuPage implements OnInit, OnDestroy {
     this.menuService.fetchMenuItems().subscribe(() => {
       this.isLoading = false;
     });
+
   }
 
   ngOnDestroy() {
@@ -55,20 +56,20 @@ export class MenuPage implements OnInit, OnDestroy {
     return this.menuService.menuHistory;
   }
 
-  updateMenu(category: string, type: string) {
+  updateMenu(catalogItem: string, type: string) {
     switch (type) {
       case 'category':
         this.isLoading = true;
-        this.menuService.fetchMenuItems(category).subscribe(menuItems => {
-          this.menuService.currentCategory.next(category);
+        this.menuService.fetchMenuItems(catalogItem).subscribe(menuItems => {
+          this.menuService.currentCategory.next(catalogItem);
           this.menuItems = menuItems;
-          this.menuService.addMenuHistory(category);
+          this.menuService.addMenuHistory(catalogItem);
           this.isLoading = false;
         });
         break;
       case 'chooseyourown':
       case 'product':
-        this.router.navigateByUrl('/main/tabs/menu/'+category);
+        this.router.navigateByUrl('/main/tabs/menu/'+catalogItem);
         break;
     }
   }

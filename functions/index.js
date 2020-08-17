@@ -6,16 +6,8 @@ const sgMail = require('@sendgrid/mail');
 
 const SENDGRID_API_KEY = functions.config().sendgrid.key;
 sgMail.setApiKey(SENDGRID_API_KEY);
-// sgMail.setSubstitutionWrappers('{{','}}');
 
 const ZIP_TAX_KEY = functions.config().ziptax.key;
-
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
 
 exports.payWithStripe = functions.https.onRequest((request, response) => {
     // Set your secret key: remember to change this to your live secret key in production
