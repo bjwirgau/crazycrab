@@ -3,10 +3,9 @@ import { NgForm } from '@angular/forms';
 import { AccountService, AuthResponseData } from '../account.service';
 import { LoadingController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Observable, combineLatest, concat } from 'rxjs';
-import { AccountdetailsService, AccountDetailData } from '../accountdetails/accountdetails.service';
+import { Observable, concat } from 'rxjs';
+import { AccountDetailData } from '../accountdetails/accountdetails.service';
 import { SignupService } from './signup.service';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-signup',
@@ -18,7 +17,6 @@ export class SignupPage implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private accountDetailService: AccountdetailsService,
     private signupService: SignupService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
@@ -44,11 +42,11 @@ export class SignupPage implements OnInit {
       .then(loadingEl => {
         loadingEl.present();
         let authObs: Observable<AuthResponseData>
-        let accountObs: Observable<AccountDetailData>
+        let accountObs: Observable<any>
         authObs = this.accountService.createUser(email,password);
         accountObs = this.signupService.createAccount(email,firstname,lastname);
 
-        concat(authObs, accountObs).subscribe(response => {
+        concat(authObs, accountObs).subscribe(() => {
           loadingEl.dismiss();
           this.router.navigateByUrl('/main/tabs/account/accountdetails');
         }, errorReponse => {

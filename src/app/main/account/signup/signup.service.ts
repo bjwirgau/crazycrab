@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AccountService } from '../account.service';
-import { take, switchMap, tap } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
 import { AccountDetails } from '../accountdetails/accountdetails.model';
 import { BehaviorSubject } from 'rxjs';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,8 @@ export class SignupService {
 
   constructor(
     private accountService: AccountService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private db: AngularFirestore
   ) { }
 
     get account(){
@@ -27,14 +28,15 @@ export class SignupService {
     firstname: string,
     lastname: string
   ) {
-    let generatedId: string;
     let account: AccountDetails;
+
     return this.accountService.userId.pipe(
       take(1),
-      switchMap(userId => {
+      map(userId => {
         if (!userId){
-          throw new Error('User id not found!');
+          throw new Error('User id not found when creating a new account!');
         }
+
         account = new AccountDetails(
           userId,
           email,
@@ -43,21 +45,19 @@ export class SignupService {
           ''
         )
 
-        return this.httpClient.post<{key: string}>(
-          `${environment.firebase.databaseURL}accounts.json`,
-          {...account, id: null}
-        );
-      }),
-      switchMap(resData => {
-        generatedId = resData.key;
-        return this.account
-      }),
-      take(1),
-      tap(account => {
-        if (account){
-          account.userId = generatedId;
-          this._account.next(account);
-        }
+        // let accountDoc = this.db.doc<any>(`accounts/${userId}`);
+        let accountCollection = this.db.collection<any>(`accounts`);
+        accountCollection.add({
+          userId: account.userId,
+          email: account.email,
+          firstname: account.firstname,
+          lastname: account.lastname,
+          defaultStore: account.defaultStore
+        }).then(() => {
+          console.log('Account created successfully!');
+        }).catch(err => {
+          console.log('Error creating acount.', err);
+        });
       })
     )
   }

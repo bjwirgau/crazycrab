@@ -6,6 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AccountDetails } from './accountdetails.model';
 import { AccountService } from '../account.service';
 import { Order } from '../../cart/order.model';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 export interface AccountDetailData {
   userId: string,
@@ -25,7 +26,8 @@ export class AccountdetailsService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private db: AngularFirestore
   ) { }
 
   get accountdetails() {
@@ -44,33 +46,29 @@ export class AccountdetailsService {
           throw new Error('No user id found!');
         }
 
-        return this.httpClient
-          .get<{ [key: string]: AccountDetailData }>(
-            `${environment.firebase.databaseURL}accounts.json?orderBy="userId"&equalTo="${userId}"`
-          )
-          .pipe(
-            map(accountDetailData => {
-              const accountDetails:AccountDetails[] = [];
-
-              for (const key in accountDetailData) {
-                if (accountDetailData.hasOwnProperty(key)) {
-                  accountDetails.push(
-                    new AccountDetails(
-                      key,
-                      accountDetailData[key].email,
-                      accountDetailData[key].firstname,
-                      accountDetailData[key].lastname,
-                      accountDetailData[key].defaultStore
-                    )
-                  );
-                }
+        return this.db.collection<AccountDetailData>('accounts', ref =>
+          ref.where('userId', '==', userId)
+        ).valueChanges().pipe(
+          map(resData => {
+            const accountDetails = [];
+            for (const key in resData){
+              if (resData.hasOwnProperty(key)){
+                accountDetails.push(new AccountDetails(
+                  resData[key].userId,
+                  resData[key].email,
+                  resData[key].firstname,
+                  resData[key].lastname,
+                  resData[key].defaultStore
+                ))
               }
-              return accountDetails;
-            }),
-            tap(accountDetails => {
-              this._accountdetails.next(accountDetails);
-            })
-          )
+            }
+
+            return accountDetails;
+          }),
+          tap(accountDetails => {
+            this._accountdetails.next(accountDetails);
+          })
+        );
       })
     )
   }
