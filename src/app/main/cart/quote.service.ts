@@ -10,6 +10,7 @@ import { take, switchMap, tap, map } from 'rxjs/operators';
 import { Quote } from './quote.model'
 import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { TaxRate } from './taxrate.model';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 
 interface TaxData {
@@ -45,9 +46,9 @@ export class QuoteService {
 
   constructor(
     private httpClient: HttpClient,
-    private corsHttpClient: HTTP,
     private quoteItemService: QuoteitemService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private db: AngularFirestore
   ) { }
 
   get quote() {
@@ -129,9 +130,9 @@ export class QuoteService {
           throw new Error('Error looking up quote. User id not found.');
         }
 
-        return this.httpClient
-        .get<{[key: string]: QuoteData}>(`${environment.firebase.databaseURL}quote.json?orderBy="userId"&equalTo="${userId}"`)
-        .pipe(
+        return this.db.collection<QuoteData>('quote', ref => 
+          ref.where('userId', '==', userId)
+        ).valueChanges().pipe(
           map(resData => {
             const quote: Quote[] = [];
 
@@ -157,8 +158,8 @@ export class QuoteService {
           tap(quote => {
             this._quote.next(quote[0])
           })
-        )}
-      )
+        )
+      })
     )
   }
 
@@ -188,10 +189,24 @@ export class QuoteService {
           quote.zipCode
         );
 
-        return this.httpClient.put(
-          `${environment.firebase.databaseURL}quote/${quote.id}.json`,
-          {...updatedQuote, id:null}
-        );
+        // return this.httpClient.put(
+        //   `${environment.firebase.databaseURL}quote/${quote.id}.json`,
+        //   {...updatedQuote, id:null}
+        // );
+        let quoteItemDoc = this.db.doc<Quote>(`quote/${quote.id}`);
+
+        quoteItemDoc.update({
+          'id': quote.id,
+          'userId': quote.userId,
+          'createdAt': quote.createdAt,
+          'updatedAt': new Date(),
+          'taxRate': Math.round((taxRate+Number.EPSILON)*100)/100,
+          'taxAmount': Math.round((taxAmount+Number.EPSILON)*100)/100,
+          'subTotal': Math.round((subtotal+Number.EPSILON)*100)/100,
+          'grandTotal': Math.round((grandtotal+Number.EPSILON)*100)/100,
+          'deliveryMethod': deliveryMethod,
+          'zipCode': quote.zipCode
+        })
       }),
       tap(() => {
         this._quote.next(updatedQuote);

@@ -9,6 +9,7 @@ import { QuoteService } from '../../cart/quote.service';
 import { QuoteitemService } from '../../cart/quoteitem.service';
 import * as _ from 'lodash';
 import { QuoteItem } from '../../cart/quoteitem.model';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 interface ProductData {
   id: string,
@@ -29,7 +30,7 @@ export class ProductService {
     private httpClient: HttpClient,
     private quoteService: QuoteService,
     private quoteItemService: QuoteitemService,
-    private router: Router
+    private db: AngularFirestore
   ) { }
 
   get product() {
@@ -37,8 +38,7 @@ export class ProductService {
   }
 
   fetchProduct(category: string, id: string) {
-    return this.httpClient
-      .get<ProductData>(`${environment.firebase.databaseURL}${category}/${id}.json`)
+    return this.db.doc<ProductData>(`${category}/${id}`).valueChanges()
       .pipe(map(resData => {
         return new Product(
           id,
@@ -47,8 +47,7 @@ export class ProductService {
           resData.price,
           !!resData.options ? resData.options : {}
         )
-        })
-    )
+      }))
   }
   
   addItemToCart(
@@ -60,17 +59,6 @@ export class ProductService {
     productOptions: {},
     imageUrl: string
   ){
-    // this.quoteService.fetchQuote().pipe(
-    //   take(1),
-    //   switchMap(quote => {
-    //     if (quote.length > 0) {
-
-    //     }
-
-    //     return this.quoteService.quote;
-    //   })
-    // )
-
     this.quoteService.fetchQuote().subscribe(
       quote => {
         if (quote.length === 0){
