@@ -7,6 +7,7 @@ import { AccountService } from '../account/account.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject, of } from 'rxjs';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 
 interface QuoteItemData {
@@ -18,7 +19,7 @@ interface QuoteItemData {
   itemPrice: number,
   totalItemPrice: number,
   itemQuantity: number,
-  itemOptions: string[],
+  itemOptions: object,
   userId: string,
   imageUrl: string
 }
@@ -34,7 +35,8 @@ export class QuoteitemService {
 
   constructor(
     private accountService: AccountService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private db: AngularFirestore
   ) { }
 
   get quoteItems() {
@@ -70,37 +72,27 @@ export class QuoteitemService {
     let quoteItem: QuoteItem;
     return this.accountService.userId.pipe(
       take(1), 
-      switchMap(userId => {
+      map(userId => {
         if (!userId) {
           throw new Error('No user id found!');
         }
-        quoteItem = new QuoteItem(
-          Math.random().toString(),
-          itemId,
-          new Date(),
-          new Date(),
-          itemName,
-          itemPrice,
-          totalItemPrice,
-          itemQuantity,
-          itemOptions,
-          userId,
-          imageUrl
-        ); 
 
-        return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}quote-item.json`, 
-          {...quoteItem, id: null}
-        );
-      }), 
-      switchMap(resData => {
-        generatedId = resData.id;
-        return this.quoteItems
-      }),
-      take(1),
-      tap(quoteItems => {
-        quoteItem.id = generatedId;
-        this._quoteItems.next(quoteItems.concat(quoteItem));
+        let quoteItemCollection = this.db.collection<QuoteItemData>('quote-item');
+        quoteItemCollection.add({
+          'id': Math.random().toString(),
+          'itemId': itemId,
+          'createdAt': new Date(),
+          'updatedAt': new Date(),
+          'itemName': itemName,
+          'itemPrice': itemPrice,
+          'totalItemPrice': totalItemPrice,
+          'itemQuantity': itemQuantity,
+          'itemOptions': itemOptions,
+          'userId': userId,
+          'imageUrl': imageUrl
+        }).then(resData => {
+          console.log("Quote Item", resData);
+        })
       })
     );
   }
@@ -113,36 +105,28 @@ export class QuoteitemService {
           throw new Error('User id not found.');
         }
 
-        return this.httpClient
-          .get<{[key: string]: QuoteItemData }>(
-            `${environment.firebase.databaseURL}quote-item.json?orderBy="userId"&equalTo="${userId}"`
-          )
-          .pipe(
-            map(resData => {
-              const quoteItems = [];
+        return this.db.collection<QuoteItemData>('quote-item').snapshotChanges().pipe(
+          map(actions => actions.map(a => {
+            const quoteItemData = a.payload.doc.data();
+            const quoteItemId = a.payload.doc.id;
+            const quoteItem = new QuoteItem(
+              quoteItemId,
+              quoteItemData.itemId,
+              quoteItemData.createdAt,
+              quoteItemData.updatedAt,
+              quoteItemData.itemName,
+              quoteItemData.itemPrice,
+              quoteItemData.totalItemPrice,
+              quoteItemData.itemQuantity,
+              quoteItemData.itemOptions,
+              quoteItemData.userId,
+              quoteItemData.imageUrl
+            )
 
-              for (const key in resData){
-                if (resData.hasOwnProperty(key)){
-                  quoteItems.push(new QuoteItem(
-                    key,
-                    resData[key].itemId,
-                    resData[key].createdAt,
-                    resData[key].updatedAt,
-                    resData[key].itemName,
-                    resData[key].itemPrice,
-                    resData[key].totalItemPrice,
-                    resData[key].itemQuantity,
-                    resData[key].itemOptions,
-                    resData[key].userId,
-                    resData[key].imageUrl
-                  ))
-                }
-              }
-
-              return quoteItems;
-          }),
-          tap(quoteItem => {
-            this._quoteItems.next(quoteItem);
+            return quoteItem;
+          })),
+          tap(quoteItems => {
+            this._quoteItems.next(quoteItems);
           })
         )
       })

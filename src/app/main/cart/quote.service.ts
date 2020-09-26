@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
 
 import { environment } from 'src/environments/environment';
 import { QuoteitemService } from './quoteitem.service';
 import { AccountService } from '../account/account.service';
 import { take, switchMap, tap, map } from 'rxjs/operators';
 import { Quote } from './quote.model'
-import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { TaxRate } from './taxrate.model';
-import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 
 
 interface TaxData {
@@ -32,6 +31,8 @@ interface QuoteData {
   zipCode: string
 }
 
+interface QuoteId extends QuoteData { id: string; }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -43,6 +44,8 @@ export class QuoteService {
   private _grandTotal = new BehaviorSubject<number>(0);
   private _subtotal = new BehaviorSubject<number>(0);
   private _zipcode = new BehaviorSubject<string>('');
+  private _quoteCollection: AngularFirestoreCollection;
+  quotes: Observable<QuoteId[]>;
 
   constructor(
     private httpClient: HttpClient,
@@ -83,41 +86,34 @@ export class QuoteService {
    * @param totalProductPrice 
    */
   createQuote(totalProductPrice: number){
-    let quote: Quote;
-    let createdAt: Date; 
-    let updatedAt: Date;
-
-    createdAt = updatedAt = new Date();
-    quote = new Quote(
-      Math.random().toString(),
-      '',
-      createdAt,
-      updatedAt,
-      0,
-      0,
-      totalProductPrice,
-      totalProductPrice,
-      '',
-      ''
-    );
 
     return this.accountService.userId.pipe(
       take(1),
-      switchMap(userId => {
+      map(userId => {
         if (!userId) {
           throw new Error('Error creating quote. User id not found');
         }
 
-        quote.userId = userId;
+        let documentId: string;
 
-        return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}quote.json`, 
-          {...quote, id: null}
-        );
-      }),
-      tap(resData => {
-        quote.id = resData.id;
-        this._quote.next(quote);
+        let quoteCollection = this.db.collection<QuoteData>('quote');
+        
+        quoteCollection.add({
+          id: '',
+          userId: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          taxRate: 0,
+          taxAmount: 0,
+          subTotal: totalProductPrice,
+          grandTotal: totalProductPrice,
+          deliveryMethod: '',
+          zipCode: ''
+        }).then(result => {
+          console.log('')
+        }).catch(err => {
+          console.log("Error", err);
+        })
       })
     )
   }
@@ -130,35 +126,30 @@ export class QuoteService {
           throw new Error('Error looking up quote. User id not found.');
         }
 
-        return this.db.collection<QuoteData>('quote', ref => 
-          ref.where('userId', '==', userId)
-        ).valueChanges().pipe(
-          map(resData => {
-            const quote: Quote[] = [];
-
-            for(const key in resData){
-              if(resData.hasOwnProperty(key)){
-                quote.push(new Quote(
-                  key,
-                  resData[key].userId,
-                  resData[key].createdAt,
-                  resData[key].updatedAt,
-                  Math.round((resData[key].taxRate+Number.EPSILON)*100)/100,
-                  Math.round((resData[key].taxAmount+Number.EPSILON)*100)/100,
-                  Math.round((resData[key].subTotal+Number.EPSILON)*100)/100,
-                  Math.round((resData[key].grandTotal+Number.EPSILON)*100)/100,
-                  resData[key].deliveryMethod,
-                  resData[key].zipCode
-                ))
-              }
-            }
+        this._quoteCollection = this.db.collection<QuoteData>('quote');
+        return this._quoteCollection.snapshotChanges().pipe(
+          map(actions => actions.map(a => {
+            const quoteData = a.payload.doc.data();
+            const quoteId = a.payload.doc.id;
+            const quote = new Quote(
+              quoteId,
+              quoteData.userId,
+              quoteData.createdAt,
+              quoteData.updatedAt,
+              Math.round((quoteData.taxRate+Number.EPSILON)*100)/100,
+              Math.round((quoteData.taxAmount+Number.EPSILON)*100)/100,
+              Math.round((quoteData.subTotal+Number.EPSILON)*100)/100,
+              Math.round((quoteData.grandtotal+Number.EPSILON)*100)/100,
+              quoteData.deliveryMethod,
+              quoteData.zipCode
+            )
 
             return quote;
-          }),
+          })),
           tap(quote => {
             this._quote.next(quote[0])
           })
-        )
+        );
       })
     )
   }
@@ -172,7 +163,7 @@ export class QuoteService {
     let updatedQuote: Quote;
     return this.quote.pipe(
       take(1),
-      switchMap(quote => {
+      map(quote => {
         // let subtotal = quote.subTotal + totalProductPrice;
         let grandtotal = subtotal + taxAmount;
 
@@ -207,9 +198,6 @@ export class QuoteService {
           'deliveryMethod': deliveryMethod,
           'zipCode': quote.zipCode
         })
-      }),
-      tap(() => {
-        this._quote.next(updatedQuote);
       })
     )
   }
