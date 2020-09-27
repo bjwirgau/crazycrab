@@ -36,6 +36,7 @@ export class PaymentPage implements OnInit, OnDestroy {
   private quoteItemSubscription: Subscription;
   private paymentSubscription: Subscription;
   private removeQuoteItemSubscription: Subscription;
+  private removeQuoteSubscription: Subscription;
 
   cardBrandToPfClass = {
     'visa': 'pf-visa',
@@ -74,6 +75,9 @@ export class PaymentPage implements OnInit, OnDestroy {
     }
     if (this.removeQuoteItemSubscription) {
       this.removeQuoteItemSubscription.unsubscribe();
+    }
+    if (this.removeQuoteSubscription) {
+      this.removeQuoteSubscription.unsubscribe();
     }
   }
 
@@ -150,10 +154,10 @@ export class PaymentPage implements OnInit, OnDestroy {
     this.isProcessing = true;
     let self = this;
 
-    let grandTotal = this.quoteService.currentGrandtotal.value;
+    let grandTotal = this.loadedQuote.grandTotal;
 
     if (grandTotal == 0){
-      return;
+      throw new Error('Cannot charge card with 0 dollar amount!');
     }
 
     if (grandTotal === null){
@@ -195,9 +199,12 @@ export class PaymentPage implements OnInit, OnDestroy {
                   });
                 });
 
-                this.quoteService.deleteQuote().subscribe();
+                this.removeQuoteSubscription = this.quoteService.deleteQuote().subscribe();
 
                 this.orderService.orderComplete.next(true);
+
+                this.quoteItemSubscription.unsubscribe();
+                this.quoteSubscription.unsubscribe();
 
                 this.router.navigateByUrl('/main/tabs/cart/confirmation');
               });

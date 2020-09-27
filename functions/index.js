@@ -3,58 +3,69 @@ const functions = require('firebase-functions');
 const https = require('https');
 const stripe = require('stripe')(functions.config().stripe.token);
 const sgMail = require('@sendgrid/mail');
+const fbAdmin = require('firebase-admin');
 
 const SENDGRID_API_KEY = functions.config().sendgrid.key;
 sgMail.setApiKey(SENDGRID_API_KEY);
-// sgMail.setSubstitutionWrappers('{{','}}');
+
 
 const ZIP_TAX_KEY = functions.config().ziptax.key;
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+fbAdmin.initializeApp({
+    credential: fbAdmin.credential.cert(require('./crazycrab.json'))
+});
 
 exports.payWithStripe = functions.https.onRequest((request, response) => {
     // Set your secret key: remember to change this to your live secret key in production
     // See your keys here: https://dashboard.stripe.com/account/apikeys
 
+    if (!request.headers.authorization || !request.headers.authorization.startsWith('Bearer ')) {
+        return response.status(401).json({ error: 'Unauthorized request.'});
+    }
+
+    const idToken = request.headers.authorization.split('Bearer ')[1];
+
     response.set('Access-Control-Allow-Origin', '*');
     response.set('Access-Control-Allow-Headers', '*');
 
-    // eslint-disable-next-line promise/catch-or-return
-    stripe.charges.create({
-        amount: request.body.amount,
-        currency: request.body.currency,
-        source: request.body.source,
-    }).then((charge) => {
-        // asynchronously called
-        response.send(charge);
-    })
-    .catch(err =>{
-        response.send(err);
-    });
+    return fbAdmin.auth().verifyIdToken(idToken).then(decodedToken => {
 
+    }).then(stripe.charges.create({
+            amount: request.body.amount,
+            currency: request.body.currency,
+            source: request.body.source,
+        }).then((charge) => {
+            // asynchronously called
+            response.send(charge);
+        })
+        .catch(err =>{
+            response.send(err);
+        })
+    );
 });
 
 exports.getTaxRate = functions.https.onRequest((request, response) => {
     var data;
     response.set('Access-Control-Allow-Origin', '*');
-    console.log(request);
-    https.get(`https://api.zip-tax.com/request/v40?key=${ZIP_TAX_KEY}&postalcode=${request.param('zipCode')}`, (res) => {
-        res.on('data', (d) => {
-            var buffer = Buffer.from(d);
-            data = buffer.toString('utf-8');
-        });
+    const idToken = request.headers.authorization.split('Bearer ')[1];
 
-        res.on('end', () => {
-            response.send(data);
+
+    return fbAdmin.auth().verifyIdToken(idToken).then(
+        https.get(`https://api.zip-tax.com/request/v40?key=${ZIP_TAX_KEY}&postalcode=${request.param('zipCode')}`, (res) => {
+            res.on('data', (d) => {
+                var buffer = Buffer.from(d);
+                data = buffer.toString('utf-8');
+            });
+
+            res.on('end', () => {
+                response.send(data);
+            })
+        }).on('error', (e) => {
+            console.log(e);
         })
-    }).on('error', (e) => {
-        console.log(e);
-    });
+    ).catch(err => {
+        console.log(err);
+    })
 });
 
 exports.sendConfirmation = functions.https.onRequest((request, response) => {
@@ -71,7 +82,6 @@ exports.sendConfirmation = functions.https.onRequest((request, response) => {
     
     const orderItems = request.param('orderItems');
     const parsedOrderItems = JSON.parse(orderItems);
-    console.log(parsedOrderItems);
 
     const msg = {
         to: userEmail,
@@ -90,27 +100,30 @@ exports.sendConfirmation = functions.https.onRequest((request, response) => {
         }
     };
 
-    console.log(msg);
+    const idToken = request.headers.authorization.split('Bearer ')[1];
+    return fbAdmin.auth().verifyIdToken(idToken).then(decodedToken => {
 
-    sgMail.send(msg)
-    .then(() => {
-        console.log('Email Sent!')
-        response.send(msg)
-    })
-    .catch( error => {  
-        // Log friendly error
-        console.error(error);
-    
-        if (error.response) {
-          // Extract error msg
-          const {message, code, response} = error;
-    
-          // Extract response msg
-          const {headers, body} = response;
-    
-          console.error(body);
-          response.send(body);
-        }
-    });
-})
+    }).then(
+        sgMail.send(msg)
+        .then(() => {
+            console.log('Email Sent!')
+            response.send(msg)
+        })
+        .catch( error => {  
+            // Log friendly error
+            console.error(error);
+        
+            if (error.response) {
+            // Extract error msg
+            const {message, code, response} = error;
+        
+            // Extract response msg
+            const {headers, body} = response;
+        
+            console.error(body);
+            response.send(body);
+            }
+        })
+    );
+});
 
