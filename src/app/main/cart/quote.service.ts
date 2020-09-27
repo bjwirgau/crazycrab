@@ -85,6 +85,7 @@ export class QuoteService {
     let quote: Quote;
     let createdAt: Date; 
     let updatedAt: Date;
+    let fetchedUserId: string;
 
     createdAt = updatedAt = new Date();
     quote = new Quote(
@@ -107,10 +108,16 @@ export class QuoteService {
           throw new Error('Error creating quote. User id not found');
         }
 
-        quote.userId = userId;
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      take(1),
+      switchMap(token => {
+
+        quote.userId = fetchedUserId;
 
         return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}quote.json`, 
+          `${environment.firebase.databaseURL}quote.json?auth=${token}`, 
           {...quote, id: null}
         );
       }),
@@ -122,6 +129,8 @@ export class QuoteService {
   }
 
   fetchQuote(){
+    let fetchedUserId: string;
+
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -129,8 +138,12 @@ export class QuoteService {
           throw new Error('Error looking up quote. User id not found.');
         }
 
-        return this.httpClient
-        .get<{[key: string]: QuoteData}>(`${environment.firebase.databaseURL}quote.json?orderBy="userId"&equalTo="${userId}"`)
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      take(1),
+      switchMap(token => {
+        return this.httpClient.get<{[key: string]: QuoteData}>(`${environment.firebase.databaseURL}quote.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`)
         .pipe(
           map(resData => {
             const quote: Quote[] = [];
@@ -169,27 +182,33 @@ export class QuoteService {
     deliveryMethod: string
   ){  
     let updatedQuote: Quote;
+    let fetchedQuote: Quote;
     return this.quote.pipe(
       take(1),
       switchMap(quote => {
+        fetchedQuote = quote;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
+
         // let subtotal = quote.subTotal + totalProductPrice;
         let grandtotal = subtotal + taxAmount;
 
         updatedQuote = new Quote(
-          quote.id,
-          quote.userId,
-          quote.createdAt,
+          fetchedQuote.id,
+          fetchedQuote.userId,
+          fetchedQuote.createdAt,
           new Date(),
           Math.round((taxRate+Number.EPSILON)*100)/100,
           Math.round((taxAmount+Number.EPSILON)*100)/100,
           Math.round((subtotal+Number.EPSILON)*100)/100,
           Math.round((grandtotal+Number.EPSILON)*100)/100,
           deliveryMethod,
-          quote.zipCode
+          fetchedQuote.zipCode
         );
 
         return this.httpClient.put(
-          `${environment.firebase.databaseURL}quote/${quote.id}.json`,
+          `${environment.firebase.databaseURL}quote/${fetchedQuote.id}.json?auth=${token}`,
           {...updatedQuote, id:null}
         );
       }),
@@ -256,13 +275,21 @@ export class QuoteService {
   }
 
   deleteQuote(){
-    return this.accountService.userId.pipe(userId => {
-      if (!userId) {
-        throw new Error('Could not find user when clearing quote.');
-      }
+    let fetchedUserId: string;
+    return this.accountService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('Could not find user when clearing quote.');
+        }
 
-      return this.httpClient
-        .delete(`${environment.firebase.databaseURL}quote.json?customerId=${userId}`);
-    })
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
+        return this.httpClient
+          .delete(`${environment.firebase.databaseURL}quote.json?customerId=${fetchedUserId}&auth=${token}`);
+      })
+    )
   }
 }

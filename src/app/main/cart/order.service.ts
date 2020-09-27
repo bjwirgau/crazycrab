@@ -43,6 +43,7 @@ export class OrderService {
   }
 
   createOrder(quote: Quote, orderId: number){
+    let fetchedUserId: string;
     let order = new Order(
       Math.random().toString(),
       orderId,
@@ -64,9 +65,13 @@ export class OrderService {
         }
 
         order.userId = userId;
-  
+        fetchedUserId = userId;
+
+        return this.accountService.token;
+      }),
+      switchMap(token => {
         return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}order.json`,
+          `${environment.firebase.databaseURL}order.json?auth=${token}`,
           {...order, id: null}
         );
       })
@@ -75,6 +80,7 @@ export class OrderService {
 
   saveOrderItem(quoteItem: QuoteItem, orderId: number){
     let orderItem: OrderItem;
+    let fetchedUserId: string;
 
     return this.accountService.userId.pipe(
       take(1),
@@ -83,6 +89,10 @@ export class OrderService {
           throw new Error('User id not found when creating order items.')
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
         let orderItem = new OrderItem(
           Math.random().toString(),
           orderId,
@@ -94,12 +104,12 @@ export class OrderService {
           Math.round((quoteItem.totalItemPrice+Number.EPSILON)*100)/100,
           quoteItem.itemQuantity,
           quoteItem.itemOptions,
-          userId,
+          fetchedUserId,
           quoteItem.imageUrl
         )
 
         return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}order-item.json`, 
+          `${environment.firebase.databaseURL}order-item.json?auth=${token}`, 
           {...orderItem, id: null}
         );
       })
@@ -114,6 +124,7 @@ export class OrderService {
   }
 
   fetchOrderItems(orderId: number){
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -125,9 +136,13 @@ export class OrderService {
           throw new Error('Order ID not found.');
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
         return this.httpClient
           .get<{[key: string]: OrderItemData}>(
-            `${environment.firebase.databaseURL}order-item.json?orderBy="orderId"&equalTo=${orderId}`
+            `${environment.firebase.databaseURL}order-item.json?orderBy="orderId"&equalTo=${orderId}&auth=${token}`
           ).pipe(
             map(resData => {
               const orderItems = [];
@@ -162,10 +177,11 @@ export class OrderService {
   }
   
   fetchLatestOrder(){
-    return this.httpClient
-    .get<{[key: string]: Order}>(
-      `${environment.firebase.databaseURL}order.json?orderBy="createdAt"&limitToLast=1`
-    ).pipe(
+    let fetchedUserId: string;
+    return this.accountService.token.pipe(
+      switchMap(token =>{
+        return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&limitToLast=1&auth=${token}`)
+      }),
       map(resData => {
         const order:Order[] = [];
 

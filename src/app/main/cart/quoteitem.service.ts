@@ -42,19 +42,18 @@ export class QuoteitemService {
   }
 
   removeQuoteItem(quoteItemId: string){
-    return this.httpClient
-      .delete(
-        `${environment.firebase.databaseURL}quote-item/${quoteItemId}.json`
-      )
-      .pipe(
-        switchMap(() => {
-          return this.quoteItems;
-        }),
-        take(1),
-        tap(quoteItems => {
-          this._quoteItems.next(quoteItems.filter(item => item.id !== quoteItemId))
-        })
-      );
+    return this.accountService.token.pipe(
+    switchMap(token => {
+      return this.httpClient.delete(`${environment.firebase.databaseURL}quote-item/${quoteItemId}.json?auth=${token}`)
+    }),
+    switchMap(() => {
+      return this.quoteItems;
+    }),
+    take(1),
+    tap(quoteItems => {
+      this._quoteItems.next(quoteItems.filter(item => item.id !== quoteItemId))
+    })
+  );
   }
 
   saveQuoteItem(
@@ -68,12 +67,19 @@ export class QuoteitemService {
   ) {
     let generatedId: string;
     let quoteItem: QuoteItem;
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1), 
       switchMap(userId => {
         if (!userId) {
           throw new Error('No user id found!');
         }
+
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      take(1),
+      switchMap(token => {
         quoteItem = new QuoteItem(
           Math.random().toString(),
           itemId,
@@ -84,15 +90,16 @@ export class QuoteitemService {
           totalItemPrice,
           itemQuantity,
           itemOptions,
-          userId,
+          fetchedUserId,
           imageUrl
         ); 
 
         return this.httpClient.post<{ id: string }>(
-          `${environment.firebase.databaseURL}quote-item.json`, 
+          `${environment.firebase.databaseURL}quote-item.json?auth=${token}`, 
           {...quoteItem, id: null}
         );
-      }), 
+      }),
+      take(1),
       switchMap(resData => {
         generatedId = resData.id;
         return this.quoteItems
@@ -106,6 +113,7 @@ export class QuoteitemService {
   }
 
   fetchQuoteItems() {
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -113,9 +121,14 @@ export class QuoteitemService {
           throw new Error('User id not found.');
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      take(1),
+      switchMap(token => {
         return this.httpClient
           .get<{[key: string]: QuoteItemData }>(
-            `${environment.firebase.databaseURL}quote-item.json?orderBy="userId"&equalTo="${userId}"`
+            `${environment.firebase.databaseURL}quote-item.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`
           )
           .pipe(
             map(resData => {
@@ -156,18 +169,22 @@ export class QuoteitemService {
     itemOptions: {}
   ){
     let updatedQuoteItems: QuoteItem[]; 
+    let fetchedQuoteItems: QuoteItem[];
     return this.quoteItems.pipe(
       take(1),
       switchMap(quoteItems => {
-        if (!quoteItems || quoteItems.length <= 0) {
-          return this.fetchQuoteItems();
-        } else {
-          return of(quoteItems);
-        }
+        fetchedQuoteItems = quoteItems;
+        // if (!fetchedQuoteItems || fetchedQuoteItems.length <= 0) {
+        //   return this.fetchQuoteItems();
+        // } else {
+        //   return of(fetchedQuoteItems);
+        // }
+        return this.accountService.token;
       }),
-      switchMap(quoteItems => {
-        const updatedQuoteItemIndex = quoteItems.findIndex(item => item.id === oldQuoteItem.id);
-        updatedQuoteItems = [...quoteItems];
+      take(1),
+      switchMap(token => {
+        const updatedQuoteItemIndex = fetchedQuoteItems.findIndex(item => item.id === oldQuoteItem.id);
+        updatedQuoteItems = [...fetchedQuoteItems];
         const updatedQuantity = oldQuoteItem.itemQuantity+itemQuantity;
         const updatedItemPrice = oldQuoteItem.itemPrice*updatedQuantity;
         updatedQuoteItems[updatedQuoteItemIndex] = new QuoteItem(
@@ -185,7 +202,7 @@ export class QuoteitemService {
         );
 
         return this.httpClient.put(
-          `${environment.firebase.databaseURL}quote-item/${oldQuoteItem.id}.json`,
+          `${environment.firebase.databaseURL}quote-item/${oldQuoteItem.id}.json?auth=${token}`,
           { ...updatedQuoteItems[updatedQuoteItemIndex], id: null}
         );
       }),

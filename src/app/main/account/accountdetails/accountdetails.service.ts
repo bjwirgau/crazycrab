@@ -37,6 +37,7 @@ export class AccountdetailsService {
   }
 
   fetchAccountDetails(){
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -44,9 +45,13 @@ export class AccountdetailsService {
           throw new Error('No user id found!');
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
         return this.httpClient
           .get<{ [key: string]: AccountDetailData }>(
-            `${environment.firebase.databaseURL}accounts.json?orderBy="userId"&equalTo="${userId}"`
+            `${environment.firebase.databaseURL}accounts.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`
           )
           .pipe(
             map(accountDetailData => {
@@ -76,6 +81,7 @@ export class AccountdetailsService {
   }
 
   fetchOrderHistory(){
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -83,9 +89,13 @@ export class AccountdetailsService {
           throw new Error('User ID not found when retrieving order history!');
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
         return this.httpClient
         .get<{[key: string]: Order}>(
-          `${environment.firebase.databaseURL}order.json?orderBy="userId"&equalTo="${userId}"`
+          `${environment.firebase.databaseURL}order.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`
         ).pipe(
           map(resData => {
             const orders: Order[] = [];
@@ -122,6 +132,7 @@ export class AccountdetailsService {
     defaultStore: string
   ) {
     let account: AccountDetails;
+    let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
       switchMap(userId => {
@@ -129,8 +140,13 @@ export class AccountdetailsService {
           throw new Error('Error saving account details. Failed to retrieve user ID.');
         }
 
+        fetchedUserId = userId;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
+
         account = new AccountDetails(
-          userId,
+          fetchedUserId,
           accountDetails.email,
           accountDetails.firstname,
           accountDetails.lastname,
@@ -138,7 +154,7 @@ export class AccountdetailsService {
         )
 
         return this.httpClient.put<{key: string}>(
-          `${environment.firebase.databaseURL}accounts/${accountDetails.userId}.json`,
+          `${environment.firebase.databaseURL}accounts/${fetchedUserId}.json?auth=${token}`,
           {...account, id: null}
         );
       })

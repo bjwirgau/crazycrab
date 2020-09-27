@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 
 import { MenuItem } from './menu-item.model';
 
@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { BehaviorSubject } from 'rxjs';
 import { LunchAvailability } from './lunch-availability.model';
+import { AccountService } from '../account/account.service'
 
 interface MenuData {
   title: string,
@@ -31,6 +32,7 @@ export class MenuService {
 
   constructor(
     private httpClient: HttpClient,
+    private accountService: AccountService
   ) { }
 
   get menuItems() {
@@ -46,9 +48,12 @@ export class MenuService {
   }
 
   fetchMenuItems(category: string = 'menu') {
-    return this.httpClient
-      .get<{[key: string]: MenuData }>(`${environment.firebase.databaseURL}${category}.json`)
-      .pipe(map(resData => {
+    return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.httpClient.get<{[key: string]: MenuData }>(`${environment.firebase.databaseURL}${category}.json?auth=${token}`)
+      }),
+      map(resData => {
         const menuItems = [];
         for (const key in resData){
           if (resData.hasOwnProperty(key)){
@@ -66,13 +71,16 @@ export class MenuService {
       tap(menuItems => {
         this._menuItems.next(menuItems);
       })
-    );
+    )
   }
 
   fetchLunchAvailability() {
-    return this.httpClient
-      .get<LunchAvailabilityData>(`${environment.firebase.databaseURL}store-configuration/lunch/availability.json`)
-      .pipe(map(resData => {
+    return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.httpClient.get<LunchAvailabilityData>(`${environment.firebase.databaseURL}store-configuration/lunch/availability.json?auth=${token}`)
+      }),
+      map(resData => {
         let lunchAvailability: LunchAvailability;
         lunchAvailability = new LunchAvailability(
           resData.start,

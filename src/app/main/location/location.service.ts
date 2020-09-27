@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { StoreLocation } from './location.model';
 import { BehaviorSubject } from 'rxjs';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
+import { AccountService } from '../account/account.service';
 
 interface StoreLocationData {
   id: string,
@@ -29,7 +30,7 @@ export class LocationService {
 
   constructor(
     private httpClient: HttpClient,
-
+    private accountService: AccountService
   ) { }
 
   get storeLocations() {
@@ -37,9 +38,12 @@ export class LocationService {
   }
 
   fetchLocations() {
-    return this.httpClient
-      .get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-configuration/store-addresses.json`)
-      .pipe(map(resData => {
+    return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.httpClient.get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-configuration/store-addresses.json?auth=${token}`)
+      }),
+      map(resData => {
         const storeLocations = [];
         for (const key in resData){
           if (resData.hasOwnProperty(key)){

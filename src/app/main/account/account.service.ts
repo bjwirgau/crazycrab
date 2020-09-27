@@ -56,6 +56,18 @@ export class AccountService {
     ));
   }
 
+  get token() {
+    return this._account.asObservable().pipe(
+      map(user => {
+        if(user) {
+          return user.token;
+        } else {
+          return null;
+        }
+      }
+    ));
+  }
+
   constructor(
     private httpClient: HttpClient
   ) {}
