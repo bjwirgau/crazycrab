@@ -176,7 +176,10 @@ export class ProductPage implements OnInit, OnDestroy {
         el.previousElementSibling.setAttribute('style', '');
       })
       checkEl.setAttribute('checked', 'true');
-      checkEl.previousElementSibling.setAttribute('style', 'color:red');
+      checkEl.previousElementSibling.setAttribute('style', 'stroke:white;fill:red;');
+      checkEl.querySelectorAll('*').forEach((e) => {
+        e.setAttribute('fill', '#ff00ff');
+      });
       
     } else {
       checkEl.setAttribute('checked', 'false');

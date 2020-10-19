@@ -4,6 +4,11 @@ ion-image {
 
 ion-icon {
     padding: 0 0.5em;
+    fill: grey;
+}
+
+ion-icon.option-selection {
+    font-size: 40px;
 }
 
 .product-option {
