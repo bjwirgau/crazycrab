@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MenuService } from '../menu.service';
 import { Subscription } from 'rxjs';
 import { NgForm, FormsModule } from '@angular/forms';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { ValidationComponent } from './validation/validation.component';
 
 @Component({
@@ -23,7 +23,8 @@ export class ChooseyourownPage implements OnInit {
     private seafoodService: SeafoodService,
     private router: Router,
     private menuService: MenuService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController
   ) { }
 
   ngOnInit() {
@@ -56,10 +57,6 @@ export class ChooseyourownPage implements OnInit {
     } else {
       this.router.navigateByUrl('/main/tabs/menu/chooseyourown/pickyoursauce');
     }
-  }
-
-  chooseSauce() {
-
   }
 
   onCancel() {
@@ -103,6 +100,35 @@ export class ChooseyourownPage implements OnInit {
       subtotalEl.value = '$'+subtotal;
       this.seafoodService.updateSeafood(inputId, seafood.name, weightEl.value, seafood.price, subtotal, seafood.imageUrl);
     }
+  }
+
+  async chooseSauce() {
+    const seafoodSelections = document.querySelectorAll('ion-input.seafood-input');
+    var seafoodCount = 0;
+    seafoodSelections.forEach(function (selection){
+      // @ts-ignore
+      if (typeof selection.value === "string" && !isNaN(parseFloat(selection.value))) {
+        // @ts-ignore
+        seafoodCount += parseFloat(selection.value);
+      }
+    });
+
+    if (seafoodCount <= 0){
+      const alert = await this.alertCtrl.create({
+        header: 'Error!',
+        message: 'Please choose one or more options',
+        buttons: ['Okay']
+      });
+  
+      await alert.present();
+      return;
+    }
+
+    this.router.navigateByUrl('/main/tabs/menu/chooseyourown/pickyoursauce');
+  }
+
+  back() {
+    this.router.navigateByUrl('/main/tabs/menu')
   }
 
 }

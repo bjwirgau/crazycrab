@@ -81,7 +81,7 @@ export class SeafoodService {
     const newSeafood = new CustomizedSeafood(
       id,
       name,
-      '',
+      [],
       '',
       weight,
       price,
@@ -113,7 +113,7 @@ export class SeafoodService {
     });
   }
 
-  chooseFlavor(flavor: string){
+  chooseFlavor(flavor: any[]){
     this._customizedSeafood.subscribe(customizedSeafood => {
       customizedSeafood.forEach(seafood => {
         seafood.flavor = flavor;

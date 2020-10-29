@@ -172,6 +172,10 @@
     font-style: normal;
   }
 
+  .header-nav-button {
+    margin: 0 0 0 -5px;
+  }
+
   --ion-font-family: "keep-calm";
   $font-family-ios-base: var(--ion-font-family);
   $font-family-md-base: var(--ion-font-family);

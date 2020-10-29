@@ -11,7 +11,7 @@ export class CustomizedSeafood {
     constructor(
         public id: string,
         public name: string,
-        public flavor: string,
+        public flavor: any[],
         public spicyLevel: string,
         public weight: string,
         public price: string,

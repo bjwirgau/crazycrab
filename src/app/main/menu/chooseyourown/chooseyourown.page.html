@@ -1,28 +1,23 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button color="secondary" defaultHref="/main/tabs/menu"></ion-back-button>
+      <ion-back-button defaultHref="/main/tabs/menu"></ion-back-button>
     </ion-buttons>
-    <ion-title class="ion-text-center">Choose Your Seafood</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="chooseSauce()">
+        Sauce
+        <ion-icon class="header-nav-button" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-text>Choose Your Seafood</ion-text>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <form #form="ngForm" (ngSubmit)="onSubmit(form)" >
     <ion-grid class="ion-no-padding">
-      <ion-row>
-        <ion-col>
-          <ion-button
-            type="submit"
-            color="primary"
-            (click)="chooseSauce()"
-            expand="block"
-            [disabled]="!form.valid"
-          >
-            Choose Your Sauce
-          </ion-button>
-        </ion-col>
-      </ion-row>
       <ion-row>
         <ion-col>
           <ion-list>
@@ -36,29 +31,25 @@
                   <ion-col>
                     <ion-grid>
                       <ion-row> 
-                        <ion-col size="7" class="chooseyourown">
-                          {{ seafood.name }}
+                        <ion-col size="6" class="chooseyourown">
+                          {{ seafood.name }} <br>
+                          <div class="pricing">
+                            {{ seafood.price | currency }} / pound
+                          </div>
                         </ion-col>
                         <ion-col size="2">
                           <ion-button [id]="'button-'+seafood.id+'-remove'" class="seafood-button" color="tertiary" size="small" (click)="reduceSeafood($event, seafood)">-</ion-button>
                         </ion-col>
+                        <ion-col size="2" class="ion-no-padding">
+                          <ion-item lines="none" class="ion-no-padding">
+                            <ion-input class="seafood-input ion-no-margin ion-no-padding" [id]="seafood.id" [name]="seafood.id" ngModel #inputCtrl="ngModel" placeholder="0.0"></ion-input>
+                            <ion-label class="ion-no-padding ion-no-margin ion-text-end seafood-input-label">lbs</ion-label>
+                          </ion-item>
+                        </ion-col>
                         <ion-col size="2">
                           <ion-button [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="small" (click)="addSeafood($event, seafood)">+</ion-button>
                         </ion-col>
-                        <ion-col>
-                          <ion-item class="ion-no-padding" lines="none">
-                              {{ seafood.price | currency }} / pound
-                          </ion-item>
-                        </ion-col>
-                        <ion-col size="5" class="ion-no-padding">
-                          <ion-item lines="none" class="ion-no-padding">
-                            <ion-label class="ion-no-padding">Pound(s):</ion-label>
-                            <ion-input class="ion-no-padding" [id]="seafood.id" [name]="seafood.id" ngModel #inputCtrl="ngModel" placeholder="0.0"></ion-input>
-                          </ion-item>
-                        </ion-col>
-                      </ion-row>
-                      <ion-row>
-                        <ion-col offset="7">
+                        <ion-col offset="7" size="5">
                           <ion-item lines="none" class="ion-no-padding">
                             <ion-label class="ion-no-padding">Subtotal:</ion-label>
                             <ion-input class="ion-no-padding" [id]="seafood.id+'-subtotal'" [name]="seafood.id+'-subtotal'" ngModel #inputCtrl="ngModel" disabled></ion-input>

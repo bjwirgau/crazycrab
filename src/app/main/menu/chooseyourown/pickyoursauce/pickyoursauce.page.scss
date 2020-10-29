@@ -1,0 +1,22 @@
+.option-title {
+    font-size: 1.6em;
+}
+.option-row {
+    font-size: 1.4em;
+    height: 100%;
+    display: block;
+    vertical-align: center;
+}
+.option-input {
+    display: none;
+}
+.selected {
+    background-color: var(--ion-color-primary);
+    color: var(--ion-color-secondary);
+}
+ion-row {
+    border-bottom: dotted 1px;
+}
+ion-icon {
+    font-size: 2rem;
+}

@@ -3,6 +3,16 @@ ion-thumbnail {
     height: 100px;
 }
 
+ion-item {
+    --detail-icon-color: var(--ion-color-primary);
+    --detail-icon-font-size: 1.5rem;
+    --detail-icon-opacity: 1;
+}
+
+.menu-label {
+    font-size: 1rem;
+}
+
 .warning-message {
     background-color: var(--ion-color-warning);
 }

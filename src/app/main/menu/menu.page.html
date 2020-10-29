@@ -20,11 +20,11 @@
           <ion-spinner></ion-spinner>
         </div>
         <ion-list *ngIf="!isLoading && menuItems.length > 0">
-          <ion-item *ngFor="let menuItem of menuItems" class="ion-no-padding" lines="none" (click)="updateMenu(menuItem.id, menuItem.type)" detail>
+          <ion-item *ngFor="let menuItem of menuItems" class="ion-no-padding" lines="none"  (click)="updateMenu(menuItem.id, menuItem.type)" detail>
             <ion-thumbnail slot="start">
               <ion-img [src]="menuItem.imageUrl"></ion-img>
             </ion-thumbnail>
-            <ion-label class="ion-text-right ion-padding-right" style="font-family:'keep-calm'" color="primary">{{ menuItem.title.toUpperCase() }}</ion-label>
+            <ion-label class="ion-text-left ion-padding-right menu-label" style="font-family:'grandstander'" color="primary">{{ menuItem.title.toUpperCase() }}</ion-label>
           </ion-item>
         </ion-list>
       </ion-col>

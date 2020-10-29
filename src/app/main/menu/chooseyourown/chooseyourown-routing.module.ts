@@ -13,10 +13,6 @@ const routes: Routes = [
     loadChildren: () => import('./pickyoursauce/pickyoursauce.module').then( m => m.PickyoursaucePageModule)
   },
   {
-    path: 'pickyourspicy',
-    loadChildren: () => import('./pickyourspicy/pickyourspicy.module').then( m => m.PickyourspicyPageModule)
-  },
-  {
     path: 'reviewyourseafood',
     loadChildren: () => import('./reviewyourseafood/reviewyourseafood.module').then( m => m.ReviewyourseafoodPageModule)
   }

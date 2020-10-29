@@ -1,9 +1,15 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button color="secondary" defaultHref="/main/tabs/menu/chooseyourown"></ion-back-button>
+      <ion-back-button defaultHref="/main/tabs/menu/chooseyourown"></ion-back-button>
     </ion-buttons>
-    <ion-title class="ion-text-center">Pick Your Sauce</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="finalizeOptions()">
+        Review
+        <ion-icon class="header-nav-button" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Customize Seafood</ion-title>
   </ion-toolbar>
 </ion-header>
   
@@ -12,9 +18,45 @@
     <ion-spinner name="dots"></ion-spinner>
   </p>
   <ion-grid *ngIf="!isLoading">
-    <ion-row *ngFor="let flavor of loadedFlavors">
-      <ion-col>
-        <ion-button expand="block" color="primary" (click)="pickYourFlavor(flavor.label)">{{ flavor.label }}</ion-button>
+    <!-------------- Choose Your Flavor Menu -------------->
+    <ion-row>
+      <ion-col size="12">
+        <div class="ion-text-center">
+          <ion-label class="option-title">Choose Your Flavor</ion-label>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngFor="let flavor of loadedFlavors" [id]="flavor.id" (click)="selectSauce($event)">
+      <ion-checkbox class="flavor option-input"></ion-checkbox>
+      <ion-col size="6">
+        <ion-icon name="bonfire-outline" size="large"></ion-icon>
+      </ion-col>
+      <ion-col size="6">
+        <div class="ion-text-end">
+          <span class="ion-margin option-row">{{ flavor.label }}</span>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+    <!-------------- Choose Your Spicy Menu -------------->
+  <ion-grid *ngIf="!isLoading">
+    <ion-row>
+      <ion-col size="12">
+        <div class="ion-text-center">
+          <ion-label class="option-title">Choose Your Spicy</ion-label>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngFor="let spicy of loadedSpicy" [id]="spicy.id" (click)="selectSpicy($event)">
+      <ion-checkbox class="spicy option-input"></ion-checkbox>
+      <ion-col size="6">
+        <ion-icon name="bonfire-outline" size="large"></ion-icon>
+      </ion-col>
+      <ion-col size="6">
+        <div class="ion-text-end">
+          <span class="ion-margin option-row">{{ spicy.label }}</span>
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>

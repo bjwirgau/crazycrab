@@ -48,7 +48,8 @@
           </ion-col>
           <ion-col *ngFor="let option of options.values" size="2" class="ion-no-padding">
             <!-- <ion-icon name="football-outline" size="large" (click)="setProductOption(options, option.value)"></ion-icon> -->
-            <ion-icon class="ion-no-padding option-selection" [src]="option.icon" (click)="setProductOption(options, option.value)"></ion-icon>
+            <ion-icon *ngIf="option.ionicon" class="ion-no-padding option-selection" [name]="option.ionicon" (click)="setProductOption(options, option.value)"></ion-icon>
+            <ion-icon *ngIf="option.icon" class="ion-no-padding option-selection" [src]="option.icon" (click)="setProductOption(options, option.value)"></ion-icon>
             <ion-checkbox [id]="getOptionId(options.id, option.value)" class="product-option" [value]="option.value"></ion-checkbox>
             <!-- <ion-label class="ion-text-center">{{option.option_label}}</ion-label> -->
             <div class="ion-text-center">
