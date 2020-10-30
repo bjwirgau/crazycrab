@@ -13,13 +13,32 @@
 ion-item.item-input {
     padding-top: 0;
 }
-.next-step {
-    font-size: 8px;
+button.seafood-button-remove {
+    width: 2.5em;
+    height: 2.5em;
+    background-color: blue;
+    color: white;
+    border-radius: 2px;
+    box-shadow: 0 5px #999;
+    &:active {
+        background-color: darkblue;
+        box-shadow: 0;
+        transform: translateY(4px);
+    }
 }
-.seafood-input-label {
-    font-size: 0.8em;
+button.seafood-button-add {
+    width: 2.5em;
+    height: 2.5em;
+    background-color: red;
+    color: white;
+    border-radius: 2px;
+    box-shadow: 0 5px #999;
+    &:active {
+        background-color: darkred;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
 }
-ion-icon {
-    font-size: 2rem;
+ion-input.seafood-input-field {
+    top: 50%;
 }
-

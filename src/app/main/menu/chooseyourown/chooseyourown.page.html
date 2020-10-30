@@ -29,7 +29,7 @@
                     <ion-img [src]="seafood.imageUrl"></ion-img>
                   </ion-col>
                   <ion-col>
-                    <ion-grid>
+                    <ion-grid class="ion-no-padding">
                       <ion-row> 
                         <ion-col size="6" class="chooseyourown">
                           {{ seafood.name }} <br>
@@ -38,7 +38,7 @@
                           </div>
                         </ion-col>
                         <ion-col size="2">
-                          <ion-button [id]="'button-'+seafood.id+'-remove'" class="seafood-button" color="tertiary" size="small" (click)="reduceSeafood($event, seafood)">-</ion-button>
+                          <ion-button type="button" [id]="'button-'+seafood.id+'-remove'" class="seafood-button-remove" color="tertiary" size="small" (click)="reduceSeafood($event, seafood)">-</ion-button>
                         </ion-col>
                         <ion-col size="2" class="ion-no-padding">
                           <ion-item lines="none" class="ion-no-padding">
@@ -47,7 +47,7 @@
                           </ion-item>
                         </ion-col>
                         <ion-col size="2">
-                          <ion-button [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="small" (click)="addSeafood($event, seafood)">+</ion-button>
+                          <ion-button type="button" [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="small" (click)="addSeafood($event, seafood)">+</ion-button>
                         </ion-col>
                         <ion-col offset="7" size="5">
                           <ion-item lines="none" class="ion-no-padding">
