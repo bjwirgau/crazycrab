@@ -27,7 +27,7 @@ export class CartPage implements OnInit {
   quote: Quote[];
   loadedLocations: StoreLocation[];
   loadedAccountDetails: AccountDetails[];
-  loadedConfig: AvailabilityConfiguration[];
+  loadedConfig: AvailabilityConfiguration[] = [];
   availableTimes: Date[] = [];
   selectedCheckbox;
   private cartSub: Subscription;
@@ -63,6 +63,7 @@ export class CartPage implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.calculateAvailablePickupTimes();
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
