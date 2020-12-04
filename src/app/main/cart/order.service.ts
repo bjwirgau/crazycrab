@@ -54,7 +54,8 @@ export class OrderService {
       Math.round((quote.taxAmount+Number.EPSILON)*100)/100,
       Math.round((quote.subTotal+Number.EPSILON)*100)/100,
       Math.round((quote.grandTotal+Number.EPSILON)*100)/100,
-      quote.deliveryMethod
+      quote.deliveryMethod,
+      quote.prepTime
     );
 
     return this.accountService.userId.pipe(
@@ -177,7 +178,6 @@ export class OrderService {
   }
   
   fetchLatestOrder(){
-    let fetchedUserId: string;
     return this.accountService.token.pipe(
       switchMap(token =>{
         return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&limitToLast=1&auth=${token}`)
@@ -197,7 +197,39 @@ export class OrderService {
               resData[key].taxAmount,
               resData[key].subTotal,
               resData[key].grandTotal,
-              resData[key].deliveryMethod
+              resData[key].deliveryMethod,
+              resData[key].prepTime
+            ))
+          }
+        }
+
+        return order;
+      })
+    )
+  }
+
+  fetchRecentOrderCount(overFlowTime: string) {
+    return this.accountService.token.pipe(
+      switchMap(token => {
+        return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&startAt="${overFlowTime}"&auth=${token}`)
+      }),
+      map(resData => {
+        const order:Order[] = [];
+
+        for (const key in resData){
+          if (resData.hasOwnProperty(key)){
+            order.push(new Order(
+              key,
+              resData[key].orderId,
+              resData[key].userId,
+              resData[key].createdAt,
+              resData[key].updatedAt,
+              resData[key].taxRate,
+              resData[key].taxAmount,
+              resData[key].subTotal,
+              resData[key].grandTotal,
+              resData[key].deliveryMethod,
+              resData[key].prepTime
             ))
           }
         }

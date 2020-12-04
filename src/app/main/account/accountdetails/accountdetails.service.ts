@@ -112,7 +112,8 @@ export class AccountdetailsService {
                   resData[key].taxAmount,
                   resData[key].subTotal,
                   resData[key].grandTotal,
-                  resData[key].deliveryMethod
+                  resData[key].deliveryMethod,
+                  resData[key].prepTime
                 ))
               }
             }

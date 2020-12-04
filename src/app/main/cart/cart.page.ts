@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { Subscription } from 'rxjs';
 
-import { LoadingController, IonItemSliding } from '@ionic/angular';
+import { LoadingController, IonItemSliding, AlertController } from '@ionic/angular';
 
 import { QuoteitemService } from './quoteitem.service';
 import { QuoteItem } from './quoteitem.model';
@@ -14,6 +14,8 @@ import { LocationService } from '../location/location.service';
 import { StoreLocation } from '../location/location.model';
 import { AccountdetailsService } from '../account/accountdetails/accountdetails.service';
 import { AccountDetails } from '../account/accountdetails/accountdetails.model';
+import { AvailabilityConfiguration } from '../configuration/availability.model';
+import { OrderService } from './order.service';
 
 @Component({
   selector: 'app-cart',
@@ -25,6 +27,9 @@ export class CartPage implements OnInit {
   quote: Quote[];
   loadedLocations: StoreLocation[];
   loadedAccountDetails: AccountDetails[];
+  loadedConfig: AvailabilityConfiguration[];
+  availableTimes: Date[] = [];
+  selectedCheckbox;
   private cartSub: Subscription;
   private quoteSub: Subscription;
   private quoteitemSub: Subscription;
@@ -39,6 +44,7 @@ export class CartPage implements OnInit {
   isLoading = false;
   isAccountLoading = false;
   taxRate: number;
+  salesTax: number;
   taxAmount: number;
   subtotal: number;
   grandTotal: number = 0;
@@ -47,11 +53,13 @@ export class CartPage implements OnInit {
   constructor(
     private quoteItemService: QuoteitemService,
     private quoteService: QuoteService,
+    private orderService: OrderService,
     private loadingCtrl: LoadingController,
     private router: Router,
     private productService: ProductService,
     private locationService: LocationService,
-    private accountDetailService: AccountdetailsService
+    private accountDetailService: AccountdetailsService,
+    private alertCtrl: AlertController
   ) { }
 
   ngOnInit() {
@@ -76,6 +84,8 @@ export class CartPage implements OnInit {
 
   ionViewWillEnter() {
     this.isLoading = true;
+    this.selectedCheckbox = null;
+    this.calculateAvailablePickupTimes();
     this.quoteitemSub = this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
@@ -97,20 +107,21 @@ export class CartPage implements OnInit {
 
       this.subtotalSub = this.quoteService.subtotal.subscribe(subtotal => {
         this.subtotal = subtotal;
-        this.updateQuoteSub = this.quoteService.updateQuote(subtotal, this.taxRate, this.taxAmount, '').subscribe();
+        this.updateQuoteSub = this.quoteService.updateQuote(subtotal, this.taxRate, this.taxAmount, '', '').subscribe();
       });
       this.taxSub = this.quoteService.taxAmount.subscribe(taxAmount => {
         this.taxAmount = taxAmount;
-        this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.taxRate, taxAmount, '').subscribe();
+        this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.taxRate, taxAmount, '', '').subscribe();
       });
       this.grandtotalSub = this.quoteService.grandtotal.subscribe(grandtotal => {
         this.grandTotal = grandtotal;
       });
       this.quoteService.calculateTax().subscribe(taxRate => {
         this.taxUpdateSub = this.quoteService.taxAmount.subscribe(taxAmount => {
-          this.taxAmount = taxAmount;          
+          this.taxAmount = taxAmount;
+          this.salesTax = taxRate.rate.taxSales;
           this.grandTotal = this.taxAmount + this.subtotal;
-          this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, taxRate.rate.taxSales, this.taxAmount, '').subscribe();
+          this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.salesTax, this.taxAmount, '', '').subscribe();
         });
       });
     })
@@ -189,7 +200,17 @@ export class CartPage implements OnInit {
   }
 
   onDeliveryButtonClick() {
-    this.router.navigateByUrl('/main/tabs/cart/payment');
+    if (!this.selectedCheckbox || this.selectedCheckbox.length == 0){
+      this.alertCtrl.create({
+        header: 'Invalid Pickup Time',
+        message: 'Please select a time to pick up your order.',
+        buttons: ['Okay']
+      }).then(
+        alertEl => alertEl.present()
+      );
+    } else {
+      this.router.navigateByUrl('/main/tabs/cart/payment');
+    }
   }
 
   deleteCartItem(id: string) {
@@ -224,5 +245,71 @@ export class CartPage implements OnInit {
 
   getValues(values) {
     return Object.values(values);
+  }
+
+  selectTime(event: any) {
+    const selectedOption = event.srcElement.closest('ion-item');
+    const allOptions = event.srcElement.closest('ion-row').getElementsByTagName('ion-item');
+    const selectedCheckbox = selectedOption.getElementsByTagName('ion-checkbox')[0];
+    this.selectedCheckbox = selectedCheckbox;
+
+    for (let option of allOptions) {
+      option.classList.remove('selected');
+      option.removeAttribute('checked');
+    }
+
+    selectedOption.toggleAttribute('checked');
+    selectedOption.classList.toggle('selected');
+
+    // @ts-ignore
+    const prepTime = document.querySelectorAll('ion-item[checked]')[0].children[1].value;
+    this.quoteSub = this.quoteService.updateQuote(this.subtotal, this.salesTax, this.taxAmount, '', prepTime).subscribe();
+
+  }
+
+  /**
+   * Required Variables
+   * 1. Current Time
+   * 2. Number of orders placed within configured time
+   * 3. Configured Lead time for orders
+   */
+  calculateAvailablePickupTimes() {
+    const intervalAvailability = 15; // In minutes
+    const maxAvailableTimes = 6;
+    let overflowOrderTimeMultiple: number = 0;
+    let orderCount: number = 0;
+
+    this.locationService.fetchAvailabilityConfiguration().subscribe(config => {
+      this.loadedConfig = config;
+      let overFlowOrderTime = new Date();
+      overFlowOrderTime.setMinutes(overFlowOrderTime.getMinutes() - this.loadedConfig[0].overflowInterval)
+      this.orderService.fetchRecentOrderCount(overFlowOrderTime.toISOString()).subscribe(orders => {
+        orderCount = orders.length;
+
+        overflowOrderTimeMultiple = Math.floor(orderCount / this.loadedConfig[0].overflowThreshold);
+
+        this.locationService.fetchLocations().subscribe(locations => {
+          const currentLocation: StoreLocation = locations[0];
+          this.availableTimes = [];
+          for (var availableTimeIndex = 1; availableTimeIndex <= maxAvailableTimes; availableTimeIndex++) {
+            // get current day and hour availability for that day and make sure the option is within the bounds of the store being open.
+            const currentDay = new Date().getDay()
+            const openTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['from']/100, 0, 0, 0));
+            let closeTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['to']/100, 0, 0, 0));
+
+            if (currentLocation['cutoffTime']) {
+              closeTime.setMinutes(closeTime.getMinutes() - currentLocation['cutoffTime']);
+            }
+
+
+            const timeOption = new Date(new Date().getTime() + (overflowOrderTimeMultiple*this.loadedConfig[0].overflowLeadTime + availableTimeIndex*intervalAvailability)*60000)
+
+            if (timeOption >= openTime && timeOption <= closeTime) {
+              this.availableTimes.push(timeOption);
+            }
+          }
+        })
+      });
+    });
   }
 }

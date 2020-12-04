@@ -86,15 +86,33 @@
           </ion-item-options>
         </ion-item-sliding>
         <ion-item-divider color="primary">
-          <ion-label>
-            Delivery Method
-          </ion-label>
+          <ion-label>Delivery Method</ion-label>
         </ion-item-divider>
         <ion-list>
           <ion-item class="delivery-method" id="delivery-method" lines="none">
             <ion-label>Pickup</ion-label>
             <ion-checkbox slot="end" value="pickup" checked="true" disabled></ion-checkbox>
           </ion-item>
+        </ion-list>
+        <ion-item-divider *ngIf="loadedConfig[0].enabled" color="primary">
+          <ion-label>Pickup Time</ion-label>
+        </ion-item-divider>
+        <ion-list *ngIf="loadedConfig[0].enabled">
+          <ion-grid>
+            <ion-row *ngIf="availableTimes.length > 0">
+              <ion-col size="2" *ngFor="let time of availableTimes">
+                <ion-item (click)="selectTime($event)" class="available-time unselected ion-text-center">
+                  <ion-label>{{ time | date : "h:mm a" }}</ion-label>
+                  <ion-checkbox [value]="time" class="pickup-time"></ion-checkbox>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="availableTimes.length == 0">
+              <ion-item lines="none">
+                <ion-text>No times are available for pickup. Please try again tomorrow.</ion-text>
+              </ion-item>
+            </ion-row>
+          </ion-grid>
         </ion-list>
         <ion-item-divider color="primary">
           <ion-label>

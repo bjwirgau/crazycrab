@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
 
 import { environment } from 'src/environments/environment';
 import { QuoteitemService } from './quoteitem.service';
@@ -28,7 +27,8 @@ interface QuoteData {
   subTotal: number,
   grandTotal: number,
   deliveryMethod: string,
-  zipCode: string
+  zipCode: string,
+  prepTime: string
 }
 
 @Injectable({
@@ -45,7 +45,6 @@ export class QuoteService {
 
   constructor(
     private httpClient: HttpClient,
-    private corsHttpClient: HTTP,
     private quoteItemService: QuoteitemService,
     private accountService: AccountService
   ) { }
@@ -97,6 +96,7 @@ export class QuoteService {
       0,
       totalProductPrice,
       totalProductPrice,
+      '',
       '',
       ''
     );
@@ -160,7 +160,8 @@ export class QuoteService {
                   Math.round((resData[key].subTotal+Number.EPSILON)*100)/100,
                   Math.round((resData[key].grandTotal+Number.EPSILON)*100)/100,
                   resData[key].deliveryMethod,
-                  resData[key].zipCode
+                  resData[key].zipCode,
+                  resData[key].prepTime
                 ))
               }
             }
@@ -179,7 +180,8 @@ export class QuoteService {
     subtotal: number, 
     taxRate: number, 
     taxAmount: number,
-    deliveryMethod: string
+    deliveryMethod: string,
+    prepTime: string
   ){  
     let updatedQuote: Quote;
     let fetchedQuote: Quote;
@@ -204,7 +206,8 @@ export class QuoteService {
           Math.round((subtotal+Number.EPSILON)*100)/100,
           Math.round((grandtotal+Number.EPSILON)*100)/100,
           deliveryMethod,
-          fetchedQuote.zipCode
+          fetchedQuote.zipCode,
+          prepTime
         );
 
         return this.httpClient.put(
@@ -252,25 +255,29 @@ export class QuoteService {
 
     let params = new HttpParams().set("zipCode",zip);
 
-    return this.httpClient
-      .get<TaxData>(
-        `${environment.firebase.cloudFunctionsUrl}getTaxRate`, {params}
-        ).pipe(
-        map(result => {
-          taxRate = new TaxRate(
-            Math.random().toString(),
-            result.results[0],
-            zip
-          )
+    return this.accountService.token.pipe(
+      switchMap(token => {
+        return this.httpClient.post<TaxData>(
+            `${environment.firebase.cloudFunctionsUrl}getTaxRate`,
+            params,
+            {headers: { Authorization: 'Bearer ' + token}}
+          )}
+        ),
+      map(result => {
+        taxRate = new TaxRate(
+          Math.random().toString(),
+          result.results[0],
+          zip
+        )
 
-          return taxRate;
-        }),
-        tap(taxRate => {
-          this._taxRate.next(taxRate);
-          this._zipcode.next(taxRate.rate['geoPostalCode']);
-          this._taxAmount.next(taxRate.rate.taxSales*this._subtotal.getValue());
-        })
-      );
+        return taxRate;
+      }),
+      tap(taxRate => {
+        this._taxRate.next(taxRate);
+        this._zipcode.next(taxRate.rate['geoPostalCode']);
+        this._taxAmount.next(taxRate.rate.taxSales*this._subtotal.getValue());
+      })
+    );
 
   }
 

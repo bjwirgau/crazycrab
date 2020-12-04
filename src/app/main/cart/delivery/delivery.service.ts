@@ -18,7 +18,8 @@ export class DeliveryService {
         0, 
         quote[0].taxRate, 
         quote[0].taxAmount, 
-        deliveryMethod
+        deliveryMethod,
+        quote[0].prepTime
       )
       .subscribe();
     })

@@ -11,6 +11,7 @@ export class StoreLocation {
         public expanded: boolean,
         public storeId: number,
         public phonenumber: string,
-        public coordinates: {}
+        public coordinates: {},
+        public cutoffTime: number
     ) {}
 }

@@ -83,7 +83,8 @@ export class ProductService {
             quote[0].subTotal+totalProductPrice,
             quote[0].taxRate,
             quote[0].taxAmount,
-            quote[0].deliveryMethod
+            quote[0].deliveryMethod,
+            quote[0].prepTime
           ).subscribe(
             quote => {
               this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
@@ -123,7 +124,8 @@ export class ProductService {
             quoteItem.itemPrice*-1,
             quote[0].taxRate,
             quote[0].taxAmount,
-            quote[0].deliveryMethod
+            quote[0].deliveryMethod,
+            quote[0].prepTime
           ).subscribe(
             quote => {
               this.quoteItemService.updateQuoteItem(

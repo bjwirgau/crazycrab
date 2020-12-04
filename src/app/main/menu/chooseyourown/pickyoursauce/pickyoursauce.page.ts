@@ -68,7 +68,7 @@ export class PickyoursaucePage implements OnInit {
     const selectedCheckbox = selectedOption.getElementsByTagName('ion-checkbox')[0];
     if (selectedOption.id === "allmixed") {
       const allOptions = event.srcElement.closest('ion-grid').getElementsByTagName('ion-checkbox');
-     for (let option of allOptions) {
+      for (let option of allOptions) {
         option.classList.remove('checkbox-checked');
         option.closest('ion-row').classList.remove('selected');
         option.removeAttribute('checked');

@@ -10,6 +10,6 @@ export class Order {
         public subTotal: number,
         public grandTotal: number,
         public deliveryMethod: string,
-        // public quoteItems: string[],
+        public prepTime: string
     ){}
 }

@@ -8,11 +8,11 @@ import { QuoteitemService } from '../quoteitem.service';
 import { OrderService } from '../order.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
+import { AccountService } from '../../account/account.service';
+import { map, switchMap } from 'rxjs/operators';
 declare var Stripe;
-// import { Stripe } from '@ionic-native/stripe/ngx'
 
-const localFirebaseFunctionUrl:string = 'http://localhost:5000/crazycrab-4ec7b/us-central1/payWithStripe';
-const prodFirebaseFunctionUrl:string = 'https://us-central1-crazycrab-4ec7b.cloudfunctions.net/payWithStripe';
 const STRIPE_CARD_ERROR = "StripeCardError";
 const STRIPE_INVALID_REQUEST = "StripeInvalidRequestError";
 
@@ -55,7 +55,8 @@ export class PaymentPage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private quoteItemService: QuoteitemService,
     private orderService: OrderService,
-    private router: Router
+    private router: Router,
+    private accountService: AccountService
   ) { }
 
   ngOnInit() {
@@ -144,7 +145,7 @@ export class PaymentPage implements OnInit, OnDestroy {
           errorElement.textContent = result.error.message;
           errorElement.classList.add('visible');
         } else {
-          this.makePayment(result.source);
+          this.makePayment(result.source).subscribe();
         }
       });
     });
@@ -167,60 +168,65 @@ export class PaymentPage implements OnInit, OnDestroy {
     // Multiplying by 100 since Stripe requires integer values for charge amount
     let stripeAdjustedGrandTotal = grandTotal * 100;
 
-    this.httpClient
-      .post(
-        prodFirebaseFunctionUrl, 
-        {
-          amount: Math.floor(stripeAdjustedGrandTotal),
-          currency: "usd",
-          source: token.id
-        }
-      )
-      .subscribe(data => {
-        this.isProcessing = false;
-        if (this.paymentSubscription){
-          this.paymentSubscription.unsubscribe;
-        }
+    return this.accountService.token.pipe(
+      switchMap( accountToken => {
+        return this.httpClient
+        .post(
+          `${environment.firebase.cloudFunctionsUrl}payWithStripe`, 
+          {
+            amount: Math.floor(stripeAdjustedGrandTotal),
+            currency: "usd",
+            source: token.id
+          },
+          { headers: { Authorization: 'Bearer ' + accountToken }}
+        )
+      }),
+      map(data => {
+          this.isProcessing = false;
+          if (this.paymentSubscription){
+            this.paymentSubscription.unsubscribe;
+          }
 
-        if(data.hasOwnProperty('id')) {
-          this.paymentComplete = true;
-          let orderId: number;
-          
-          this.orderService.fetchLatestOrder().subscribe(order => {
-            orderId = order.length === 1 ? order[0].orderId+1 : 1;
-            this.orderService.createOrder(this.loadedQuote, orderId).subscribe(() => {
-              this.orderService.createOrderItems(self.loadedQuoteItems, orderId);
-              this.orderService.fetchOrderItems(order[0].orderId).subscribe(() => {
-                //clear cart items
+          if(data.hasOwnProperty('id')) {
+            this.paymentComplete = true;
+            let orderId: number;
+            
+            this.orderService.fetchLatestOrder().subscribe(order => {
+              orderId = order.length === 1 ? order[0].orderId+1 : 1;
+              this.orderService.createOrder(this.loadedQuote, orderId).subscribe(() => {
+                this.orderService.createOrderItems(self.loadedQuoteItems, orderId);
+                this.orderService.fetchOrderItems(order[0].orderId).subscribe(() => {
+                  //clear cart items
 
-                this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
-                  quoteItems.forEach(quoteItem => {
-                    this.removeQuoteItemSubscription = this.quoteItemService.removeQuoteItem(quoteItem.id).subscribe();
+                  this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
+                    quoteItems.forEach(quoteItem => {
+                      this.removeQuoteItemSubscription = this.quoteItemService.removeQuoteItem(quoteItem.id).subscribe();
+                    });
                   });
+
+                  this.removeQuoteSubscription = this.quoteService.deleteQuote().subscribe();
+
+                  this.orderService.orderComplete.next(true);
+
+                  this.quoteItemSubscription.unsubscribe();
+                  this.quoteSubscription.unsubscribe();
+
+                  this.router.navigateByUrl('/main/tabs/cart/confirmation');
                 });
-
-                this.removeQuoteSubscription = this.quoteService.deleteQuote().subscribe();
-
-                this.orderService.orderComplete.next(true);
-
-                this.quoteItemSubscription.unsubscribe();
-                this.quoteSubscription.unsubscribe();
-
-                this.router.navigateByUrl('/main/tabs/cart/confirmation');
               });
             });
-          });
-        } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
-          console.log(data['raw']['message']);
-          const errorAlert = this.alertController.create({
-            header: 'Payment Error',
-            message: data['raw']['message'],
-            buttons: [{
-              text: 'Okay'
-            }]
-          }).then(alertEl => alertEl.present());
-        }
-      });
+          } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
+            console.log(data['raw']['message']);
+            const errorAlert = this.alertController.create({
+              header: 'Payment Error',
+              message: data['raw']['message'],
+              buttons: [{
+                text: 'Okay'
+              }]
+            }).then(alertEl => alertEl.present());
+          }
+        })
+      )
   }
 
   setOutcome(result) {
