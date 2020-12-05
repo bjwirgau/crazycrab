@@ -17,6 +17,7 @@ import { AccountDetails } from '../account/accountdetails/accountdetails.model';
 import { AvailabilityConfiguration } from '../configuration/availability.model';
 import { OrderService } from './order.service';
 import { map, switchMap } from 'rxjs/operators';
+import { TaxRate } from './taxrate.model';
 
 @Component({
   selector: 'app-cart',
@@ -34,15 +35,12 @@ export class CartPage implements OnInit {
   private cartSub: Subscription;
   private quoteSub: Subscription;
   private quoteitemSub: Subscription;
-  private taxSub: Subscription;
-  private taxUpdateSub: Subscription;
-  private updateQuoteSub: Subscription;
-  private subtotalSub: Subscription;
   private grandtotalSub: Subscription;
   private deleteQuoteSubscription: Subscription;
   private deleteQuoteItemSubscription: Subscription;
   private quoteItemSubscription: Subscription;
   private pickupTimesSub: Subscription;
+  private quoteSubscription: Subscription;
   isLoading = false;
   isAccountLoading = false;
   taxRate: number;
@@ -91,66 +89,48 @@ export class CartPage implements OnInit {
   ionViewWillEnter() {
     this.isLoading = true;
     this.selectedCheckbox = null;
+    let taxRate: TaxRate;
     this.calculateAvailablePickupTimes();
-    this.quoteitemSub = this.quoteItemService.fetchQuoteItems().subscribe(quoteItems => {
-      this.quoteItems = quoteItems;
-    });
-    this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
-      this.quoteItems = quoteItems;
-    });
-    this.quoteSub = this.quoteService.fetchQuote().subscribe(quote => {
-      if(quote.length <= 0){
-        return;
-      }
-      
-      this.quote = quote;
-      
-      let amount = 0;
-      this.quoteItems.forEach(item => {
-          amount += item.totalItemPrice;
-      });
-      this.quoteService.updateTotals(amount);
 
-      this.subtotalSub = this.quoteService.subtotal.subscribe(subtotal => {
+    this.quoteSubscription = this.quoteItemService.fetchQuoteItems().pipe(
+      switchMap(quoteItems => {
+        this.quoteItems = quoteItems;
+        return this.quoteService.fetchQuote();
+      }),
+      switchMap(quote => {
+        if(quote.length <= 0){
+          return;
+        }
+        
+        this.quote = quote;
+        this.updateTotals();
+
+        return this.quoteService.subtotal;
+      }),
+      switchMap(subtotal => {
         this.subtotal = subtotal;
-        this.updateQuoteSub = this.quoteService.updateQuote(subtotal, this.taxRate, this.taxAmount, '', '').subscribe();
-      });
-      this.taxSub = this.quoteService.taxAmount.subscribe(taxAmount => {
+        return this.quoteService.calculateTax();
+      }),
+      switchMap(rate => {
+        taxRate = rate;
+        return this.quoteService.taxAmount;
+      }),
+      switchMap(taxAmount => {
         this.taxAmount = taxAmount;
-        this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.taxRate, taxAmount, '', '').subscribe();
-      });
-      this.grandtotalSub = this.quoteService.grandtotal.subscribe(grandtotal => {
-        this.grandTotal = grandtotal;
-      });
-      this.quoteService.calculateTax().subscribe(taxRate => {
-        this.taxUpdateSub = this.quoteService.taxAmount.subscribe(taxAmount => {
-          this.taxAmount = taxAmount;
-          this.salesTax = taxRate.rate.taxSales;
-          this.grandTotal = this.taxAmount + this.subtotal;
-          this.updateQuoteSub = this.quoteService.updateQuote(this.subtotal, this.salesTax, this.taxAmount, '', '').subscribe();
-        });
-      });
-    })
+        this.salesTax = taxRate.rate.taxSales;
+        this.grandTotal = this.taxAmount + this.subtotal;
+
+        return this.quoteService.updateQuote(this.subtotal, this.salesTax, this.taxAmount, '', '')
+      })
+    ).subscribe();
   }
 
   ionViewDidLeave() {
     if (this.quoteSub){
       this.quoteSub.unsubscribe();
     }
-    if (this.taxSub){
-      this.taxSub.unsubscribe();
-    }
-    if (this.updateQuoteSub) {
-      this.quoteSub.unsubscribe();
-    }
     if (this.grandtotalSub) {
       this.grandtotalSub.unsubscribe();
-    }
-    if (this.taxUpdateSub){
-      this.taxUpdateSub.unsubscribe();
-    }
-    if (this.subtotalSub){
-      this.subtotalSub.unsubscribe();
     }
     if (this.quoteitemSub){
       this.quoteitemSub.unsubscribe();
@@ -163,6 +143,9 @@ export class CartPage implements OnInit {
     }
     if (this.quoteItemSubscription) {
       this.quoteItemSubscription.unsubscribe();
+    }
+    if (this.quoteSubscription) {
+      this.quoteSubscription.unsubscribe();
     }
   }
 
@@ -333,5 +316,13 @@ export class CartPage implements OnInit {
 
   getOverFlowOrderTimeMultiple(orderCount: number) {
     return Math.floor(orderCount / this.availabilityConfiguration[0].overflowThreshold);
+  }
+
+  updateTotals() {
+    let amount = 0;
+    this.quoteItems.forEach(item => {
+        amount += item.totalItemPrice;
+    });
+    this.quoteService.updateTotals(amount);
   }
 }
