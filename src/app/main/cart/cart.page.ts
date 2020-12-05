@@ -204,9 +204,12 @@ export class CartPage implements OnInit {
 
   deleteCartItem(id: string) {
     this.isTaxLoading = true;
-    this.deleteQuoteItemSubscription = this.quoteItemService.removeQuoteItem(id).subscribe(() => {
-      let amount = 0;
-      this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
+    this.deleteQuoteItemSubscription = this.quoteItemService.removeQuoteItem(id).pipe(
+      switchMap(() => {
+        return this.quoteItemService.quoteItems;
+      }),
+      map(quoteItems => {
+        let amount = 0;
         if (quoteItems.length <= 0){
           this.deleteQuoteSubscription = this.quoteService.deleteQuote().subscribe();
         } else {
@@ -216,16 +219,18 @@ export class CartPage implements OnInit {
   
           this.quoteService.updateTotals(amount);
   
-          this.quoteService.calculateTax()
-          .subscribe(taxAmount => {
-            this.quoteService.taxAmount.subscribe(taxAmount => {
-              this.taxAmount = taxAmount;
-              this.isTaxLoading = false;
-            });
-          });
+          this.quoteService.calculateTax().pipe(
+            switchMap(() => {
+              return this.quoteService.taxAmount;
+            }),
+            map(taxAmount => {
+                this.taxAmount = taxAmount;
+                this.isTaxLoading = false;
+            })
+          );
         }
       })
-    });
+    ).subscribe();
   }
 
   isObject(option): boolean {
