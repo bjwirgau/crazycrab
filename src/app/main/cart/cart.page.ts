@@ -16,6 +16,7 @@ import { AccountdetailsService } from '../account/accountdetails/accountdetails.
 import { AccountDetails } from '../account/accountdetails/accountdetails.model';
 import { AvailabilityConfiguration } from '../configuration/availability.model';
 import { OrderService } from './order.service';
+import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cart',
@@ -27,7 +28,7 @@ export class CartPage implements OnInit {
   quote: Quote[];
   loadedLocations: StoreLocation[];
   loadedAccountDetails: AccountDetails[];
-  loadedConfig: AvailabilityConfiguration[] = [];
+  availabilityConfiguration: AvailabilityConfiguration[];
   availableTimes: Date[] = [];
   selectedCheckbox;
   private cartSub: Subscription;
@@ -41,6 +42,7 @@ export class CartPage implements OnInit {
   private deleteQuoteSubscription: Subscription;
   private deleteQuoteItemSubscription: Subscription;
   private quoteItemSubscription: Subscription;
+  private pickupTimesSub: Subscription;
   isLoading = false;
   isAccountLoading = false;
   taxRate: number;
@@ -63,7 +65,7 @@ export class CartPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.calculateAvailablePickupTimes();
+    this.pickupTimesSub = this.calculateAvailablePickupTimes().subscribe();
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
@@ -80,6 +82,9 @@ export class CartPage implements OnInit {
   ngOnDestroy() {
     if(this.cartSub){
       this.cartSub.unsubscribe();
+    }
+    if(this.pickupTimesSub) {
+      this.pickupTimesSub.unsubscribe();
     }
   }
 
@@ -275,42 +280,58 @@ export class CartPage implements OnInit {
    * 3. Configured Lead time for orders
    */
   calculateAvailablePickupTimes() {
-    const intervalAvailability = 15; // In minutes
     const maxAvailableTimes = 6;
+    const intervalAvailability = 15; // In minutes
     let overflowOrderTimeMultiple: number = 0;
+    let overFlowOrderTime = new Date();
     let orderCount: number = 0;
 
-    this.locationService.fetchAvailabilityConfiguration().subscribe(config => {
-      this.loadedConfig = config;
-      let overFlowOrderTime = new Date();
-      overFlowOrderTime.setMinutes(overFlowOrderTime.getMinutes() - this.loadedConfig[0].overflowInterval)
-      this.orderService.fetchRecentOrderCount(overFlowOrderTime.toISOString()).subscribe(orders => {
+    return this.locationService.fetchAvailabilityConfiguration().pipe(
+      switchMap(availabilityConfiguration => {
+        this.availabilityConfiguration = availabilityConfiguration;
+
+        return this.orderService.fetchRecentOrders(overFlowOrderTime.toISOString());
+      }),
+      map(orders => {
         orderCount = orders.length;
 
-        overflowOrderTimeMultiple = Math.floor(orderCount / this.loadedConfig[0].overflowThreshold);
+         // Index 0 is the Southfield location. Future iterations may include a way to set a user's default store and currently selected store
+         const currentLocation: StoreLocation = this.loadedLocations[0];
+         this.availableTimes = [];
+ 
+         this.setOverFlowOrderTime(overFlowOrderTime);
+         overflowOrderTimeMultiple = this.getOverFlowOrderTimeMultiple(orderCount);
+ 
+         for (var availableTimeIndex = 1; availableTimeIndex <= maxAvailableTimes; availableTimeIndex++) {
+           // get current day and hour availability for that day and make sure the option is within the bounds of the store being open.
+           const currentDay = new Date().getDay()
+           const openTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['from']/100, 0, 0, 0));
+           let closeTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['to']/100, 0, 0, 0));
+ 
+           if (currentLocation['cutoffTime']) {
+             closeTime.setMinutes(closeTime.getMinutes() - currentLocation['cutoffTime']);
+           }
+ 
+ 
+           const timeOption = new Date(new Date().getTime() + (overflowOrderTimeMultiple*this.availabilityConfiguration[0].overflowLeadTime + availableTimeIndex*intervalAvailability)*60000)
+ 
+           if (timeOption < openTime ){
+             availableTimeIndex--;
+           }
+           if (timeOption >= openTime && timeOption <= closeTime) {
+             this.availableTimes.push(timeOption);
+           }
+         }
+        }
+      )
+    )
+  }
 
-        this.locationService.fetchLocations().subscribe(locations => {
-          const currentLocation: StoreLocation = locations[0];
-          this.availableTimes = [];
-          for (var availableTimeIndex = 1; availableTimeIndex <= maxAvailableTimes; availableTimeIndex++) {
-            // get current day and hour availability for that day and make sure the option is within the bounds of the store being open.
-            const currentDay = new Date().getDay()
-            const openTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['from']/100, 0, 0, 0));
-            let closeTime = new Date(new Date().setHours(currentLocation.hours[currentDay]['to']/100, 0, 0, 0));
+  setOverFlowOrderTime(overFlowOrderTime: Date) {
+    overFlowOrderTime.setMinutes(overFlowOrderTime.getMinutes() - this.availabilityConfiguration[0].overflowInterval);
+  }
 
-            if (currentLocation['cutoffTime']) {
-              closeTime.setMinutes(closeTime.getMinutes() - currentLocation['cutoffTime']);
-            }
-
-
-            const timeOption = new Date(new Date().getTime() + (overflowOrderTimeMultiple*this.loadedConfig[0].overflowLeadTime + availableTimeIndex*intervalAvailability)*60000)
-
-            if (timeOption >= openTime && timeOption <= closeTime) {
-              this.availableTimes.push(timeOption);
-            }
-          }
-        })
-      });
-    });
+  getOverFlowOrderTimeMultiple(orderCount: number) {
+    return Math.floor(orderCount / this.availabilityConfiguration[0].overflowThreshold);
   }
 }

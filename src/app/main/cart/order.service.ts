@@ -208,7 +208,7 @@ export class OrderService {
     )
   }
 
-  fetchRecentOrderCount(overFlowTime: string) {
+  fetchRecentOrders(overFlowTime: string) {
     return this.accountService.token.pipe(
       switchMap(token => {
         return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&startAt="${overFlowTime}"&auth=${token}`)

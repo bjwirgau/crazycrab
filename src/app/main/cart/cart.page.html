@@ -94,10 +94,10 @@
             <ion-checkbox slot="end" value="pickup" checked="true" disabled></ion-checkbox>
           </ion-item>
         </ion-list>
-        <ion-item-divider *ngIf="loadedConfig[0].enabled" color="primary">
+        <ion-item-divider *ngIf="availabilityConfiguration" color="primary">
           <ion-label>Pickup Time</ion-label>
         </ion-item-divider>
-        <ion-list *ngIf="loadedConfig[0].enabled">
+        <ion-list *ngIf="availabilityConfiguration">
           <ion-grid>
             <ion-row *ngIf="availableTimes.length > 0">
               <ion-col size="2" *ngFor="let time of availableTimes">
