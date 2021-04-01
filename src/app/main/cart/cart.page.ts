@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Subscription } from 'rxjs';
+import { NEVER, Subscription } from 'rxjs';
 
 import { LoadingController, IonItemSliding, AlertController } from '@ionic/angular';
 
@@ -99,7 +99,8 @@ export class CartPage implements OnInit {
       }),
       switchMap(quote => {
         if(quote.length <= 0){
-          return;
+          // NEVER breaks switchMap Observable chain and prevents downstream observables from being executed
+          return NEVER;
         }
         
         this.quote = quote;
@@ -302,15 +303,10 @@ export class CartPage implements OnInit {
  
  
            const timeOption = new Date(new Date().getTime() + (overflowOrderTimeMultiple*this.availabilityConfiguration[0].overflowLeadTime + availableTimeIndex*intervalAvailability)*60000)
- 
-           // This decrements the counter so that all available times show in the morning
-          //  if (timeOption < openTime ){
-          //    availableTimeIndex--;
-          //  }
+
            if (timeOption >= openTime && timeOption <= closeTime) {
              this.availableTimes.push(timeOption);
            }
-           console.log(timeOption);
          }
         }
       )

@@ -42,6 +42,14 @@ export class ConfirmationPage implements OnInit {
     }
   }
 
+  ionViewDidEnter() {
+    let tab = document.querySelector('#tab-button-cart');
+  
+    tab.addEventListener('click', function() {
+      this.router.navigateByUrl('/main/tabs/cart');
+    }.bind(this))
+}
+
   isObject(option): boolean {
     return typeof option === 'object'
   }
