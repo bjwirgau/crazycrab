@@ -31,7 +31,7 @@ export class ConfirmationService {
           return this.accountService.token.pipe(
             switchMap(token => {
               return this.httpClient.post(
-                `${environment.firebase.localCloudFunctionsUrl}sendConfirmation`, 
+                `${environment.firebase.cloudFunctionsUrl}sendConfirmation`, 
                 {
                   firstname: accountDetails[0].firstname,
                   lastname: accountDetails[0].lastname,

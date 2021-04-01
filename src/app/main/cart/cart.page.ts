@@ -303,12 +303,14 @@ export class CartPage implements OnInit {
  
            const timeOption = new Date(new Date().getTime() + (overflowOrderTimeMultiple*this.availabilityConfiguration[0].overflowLeadTime + availableTimeIndex*intervalAvailability)*60000)
  
-           if (timeOption < openTime ){
-             availableTimeIndex--;
-           }
+           // This decrements the counter so that all available times show in the morning
+          //  if (timeOption < openTime ){
+          //    availableTimeIndex--;
+          //  }
            if (timeOption >= openTime && timeOption <= closeTime) {
              this.availableTimes.push(timeOption);
            }
+           console.log(timeOption);
          }
         }
       )
