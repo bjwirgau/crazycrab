@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>orders</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+    <div class="drop-area" #newItemsDropzone>
+      <div class="drop-title">New Items</div>
+      <div class="item-group">
+        <ion-card *ngFor="let newItem of newItems" class="complete-items">
+          <ion-card-header>
+            <ion-card-subtitle>New Item {{ newItem.id }}</ion-card-subtitle>
+            <ion-card-title>{{ newItem.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Item Content
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+    <div class="drop-area" #completeItemsDropzone>
+      <div class="drop-title">Complete Items</div>
+      <div class="item-group">
+        <ion-card *ngFor="let completeItem of completeItems" class="complete-items">
+          <ion-card-header>
+            <ion-card-subtitle>Complete Item {{ completeItem.id }}</ion-card-subtitle>
+            <ion-card-title>{{ completeItem.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Item Content
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+</ion-content>

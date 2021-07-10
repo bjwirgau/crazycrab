@@ -4,6 +4,7 @@ export class AccountDetails {
         public email: string,
         public firstname: string,
         public lastname: string,
-        public defaultStore: string
+        public defaultStore: string,
+        public isAdmin: boolean
     ) {}
 }

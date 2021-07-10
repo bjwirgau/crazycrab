@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { StoreLocation } from './location.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AccountService } from '../account/account.service';
 import { AvailabilityConfiguration } from '../configuration/availability.model';
+import { Router } from '@angular/router';
 
 interface StoreLocationData {
   id: string,
@@ -42,7 +43,9 @@ export class LocationService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router,
+    private geolocation: Geolocation
   ) { }
 
   get storeLocations() {
@@ -56,6 +59,15 @@ export class LocationService {
   fetchLocations() {
     return this.accountService.token.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-configuration/store-addresses.json?auth=${token}`)
       }),
@@ -93,6 +105,15 @@ export class LocationService {
     return this.accountService.token.pipe(
       take(1),
       switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
         return this.httpClient.get<{[key: string]: AvailabilityConfigurationInterface }>(`${environment.firebase.databaseURL}store-configuration/availability.json?auth=${token}`)
       }),
       map(resData => {
@@ -116,5 +137,13 @@ export class LocationService {
         this._availabilityConfiguration.next(availabilityConfig);
       })
     )
+  }
+
+  fetchNearbyLocations(locations) {
+    let currentLocation;
+    this.geolocation.getCurrentPosition().then(location => {
+      currentLocation = location;
+      return this.httpClient.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${currentLocation.coords.latitude},${currentLocation.coords.longitude}&destinations=42.47358466,-83.28482151&key=AIzaSyBQBDQ5aEiImcHAFRGBf1QUpTmDbNRlIl4}`).subscribe()
+    })
   }
 }

@@ -12,7 +12,8 @@ export interface AccountDetailData {
   email: string,
   firstname: string,
   lastname: string,
-  defaultStore: string
+  defaultStore: string,
+  isAdmin: boolean
 }
 
 @Injectable({
@@ -20,7 +21,7 @@ export interface AccountDetailData {
 })
 export class AccountdetailsService {
 
-  private _accountdetails = new BehaviorSubject<AccountDetails[]>([]);
+  private _accountdetails = new BehaviorSubject<AccountDetails>(null);
   private _orders = new BehaviorSubject<Order[]>([]);
 
   constructor(
@@ -55,22 +56,35 @@ export class AccountdetailsService {
           )
           .pipe(
             map(accountDetailData => {
-              const accountDetails:AccountDetails[] = [];
+              const accountData = accountDetailData[Object.keys(accountDetailData)[0]];
+              const accountId = Object.keys(accountDetailData)[0];
 
-              for (const key in accountDetailData) {
-                if (accountDetailData.hasOwnProperty(key)) {
-                  accountDetails.push(
-                    new AccountDetails(
-                      key,
-                      accountDetailData[key].email,
-                      accountDetailData[key].firstname,
-                      accountDetailData[key].lastname,
-                      accountDetailData[key].defaultStore
-                    )
-                  );
-                }
-              }
-              return accountDetails;
+              return new AccountDetails(
+                accountId,
+                accountData.email,
+                accountData.firstname,
+                accountData.lastname,
+                accountData.defaultStore,
+                accountData.isAdmin
+              )
+              // const accountDetails:AccountDetails[] = [];
+
+              // for (const key in accountDetailData) {
+              //   if (accountDetailData.hasOwnProperty(key)) {
+                  
+              //     accountDetails.push(
+              //       new AccountDetails(
+              //         key,
+              //         accountDetailData[key].email,
+              //         accountDetailData[key].firstname,
+              //         accountDetailData[key].lastname,
+              //         accountDetailData[key].defaultStore,
+              //         accountDetailData[key].isAdmin
+              //       )
+              //     );
+              //   }
+              // }
+              return accountData;
             }),
             tap(accountDetails => {
               this._accountdetails.next(accountDetails);
@@ -151,7 +165,8 @@ export class AccountdetailsService {
           accountDetails.email,
           accountDetails.firstname,
           accountDetails.lastname,
-          defaultStore
+          defaultStore,
+          accountDetails.isAdmin
         )
 
         return this.httpClient.put<{key: string}>(

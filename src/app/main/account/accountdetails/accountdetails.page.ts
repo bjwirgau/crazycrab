@@ -12,6 +12,7 @@ import { LocationService } from '../../location/location.service';
 import { NgForm } from '@angular/forms';
 import { StoreLocation } from '../../location/location.model';
 import { Subscription } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-accountdetails',
@@ -19,7 +20,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./accountdetails.page.scss'],
 })
 export class AccountdetailsPage implements OnInit, OnDestroy {
-  loadedAccountDetails: AccountDetails[];
+  loadedAccountDetails: AccountDetails;
   loadedOrders: Order[];
   loadedLocations: StoreLocation[];
   isLoading = false;
@@ -31,6 +32,9 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
 
   accountDetailsSubscription: Subscription;
   saveAccountSubscription: Subscription;
+  fetchedAccountDetailsSubscription: Subscription;
+  fetchedOrderHistorySubscription: Subscription;
+  fetchedLocationsSubscription: Subscription;
 
   constructor(
     private accountService: AccountService,
@@ -40,25 +44,30 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
     private modalController: ModalController
   ) { }
 
-  ngOnInit() {
-    this.compareWith = this.compareWithFn;
-  }
+  ngOnInit() {}
 
-  ngOnDestroy(){}
+  ngOnDestroy() {}
 
   ionViewWillEnter() {
     this.isLoading = true;
-    this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
-      this.loadedAccountDetails = accountDetails;
-      this.defaultLocation = accountDetails[0].defaultStore;
-      this.isLoading = false;
-    });
-    this.accountDetailService.fetchOrderHistory().subscribe(orders => {
-      this.loadedOrders = orders.sort((a,b) => (a.orderId < b.orderId) ? 1 : -1);
-    });
-    this.locationService.fetchLocations().subscribe(locations => {
-      this.loadedLocations = locations;
-    });
+    // this.accountService.userIsAuthenticated.pipe(
+    //   take(1),
+    //   tap(authenticated=> {
+    //     if (authenticated) {
+          this.fetchedAccountDetailsSubscription = this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
+            this.loadedAccountDetails = accountDetails;
+            this.defaultLocation = accountDetails.defaultStore;
+            this.isLoading = false;
+          });
+          this.fetchedOrderHistorySubscription = this.accountDetailService.fetchOrderHistory().subscribe(orders => {
+            this.loadedOrders = orders.sort((a,b) => (a.orderId < b.orderId) ? 1 : -1);
+          });
+          this.fetchedLocationsSubscription = this.locationService.fetchLocations().subscribe(locations => {
+            this.loadedLocations = locations;
+          });
+        // }
+      // })
+    // )
   }
 
   ionViewWillLeave() {
@@ -67,6 +76,15 @@ export class AccountdetailsPage implements OnInit, OnDestroy {
     }
     if (this.saveAccountSubscription){
       this.saveAccountSubscription.unsubscribe();
+    }
+    if (this.fetchedAccountDetailsSubscription){
+      this.fetchedAccountDetailsSubscription.unsubscribe();
+    }
+    if (this.fetchedOrderHistorySubscription){
+      this.fetchedOrderHistorySubscription.unsubscribe();
+    }
+    if (this.fetchedLocationsSubscription){
+      this.fetchedLocationsSubscription.unsubscribe();
     }
   }
 

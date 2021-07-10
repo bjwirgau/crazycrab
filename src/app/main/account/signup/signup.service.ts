@@ -4,7 +4,8 @@ import { take, switchMap, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AccountDetails } from '../accountdetails/accountdetails.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class SignupService {
 
   constructor(
     private accountService: AccountService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private router: Router
   ) { }
 
     get account(){
@@ -25,13 +27,28 @@ export class SignupService {
   createAccount(
     email: string,
     firstname: string,
-    lastname: string
+    lastname: string,
+    isAdmin: boolean = false
   ) {
     let generatedId: string;
     let account: AccountDetails;
+    let userId: string;
     return this.accountService.userId.pipe(
       take(1),
-      switchMap(userId => {
+      switchMap(id => {
+        userId = id;
+        return this.accountService.token;
+      }),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
         if (!userId){
           throw new Error('User id not found!');
         }
@@ -40,11 +57,12 @@ export class SignupService {
           email,
           firstname,
           lastname,
-          ''
+          '',
+          isAdmin
         )
 
         return this.httpClient.post<{key: string}>(
-          `${environment.firebase.databaseURL}accounts.json`,
+          `${environment.firebase.databaseURL}accounts.json?auth=${token}`,
           {...account, id: null}
         );
       }),

@@ -12,6 +12,16 @@ export const environment = {
     cloudFunctionsUrl: 'https://us-central1-crazycrab-4ec7b.cloudfunctions.net/',
     localCloudFunctionsUrl: 'http://localhost:5001/crazycrab-4ec7b/us-central1/'
   },
+  firebaseConfig: {
+    apiKey: "AIzaSyC2fKGbGC0FPYA1iIKfqrwzSN4_aYEpm1s",
+    authDomain: "crazycrab-4ec7b.firebaseapp.com",
+    databaseURL: "https://crazycrab-4ec7b.firebaseio.com",
+    projectId: "crazycrab-4ec7b",
+    storageBucket: "crazycrab-4ec7b.appspot.com",
+    messagingSenderId: "640106672127",
+    appId: "1:640106672127:web:6752eb49df2731bf0541ca",
+    measurementId: "G-1GJXR61Y82"
+  },
   ziptax: {
     key: 'YSQJxyvt5NG3OWgB'
   }

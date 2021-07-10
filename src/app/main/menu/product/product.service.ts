@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { map, tap, take, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { Product } from './product.model';
 import { QuoteService } from '../../cart/quote.service';
 import { QuoteitemService } from '../../cart/quoteitem.service';
@@ -30,7 +30,8 @@ export class ProductService {
     private httpClient: HttpClient,
     private quoteService: QuoteService,
     private quoteItemService: QuoteitemService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get product() {
@@ -39,6 +40,15 @@ export class ProductService {
 
   fetchProduct(category: string, id: string) {
     return this.accountService.token.pipe(
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<ProductData>(`${environment.firebase.databaseURL}${category}/${id}.json?auth=${token}`)
       }),

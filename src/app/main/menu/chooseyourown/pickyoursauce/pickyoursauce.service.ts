@@ -5,8 +5,9 @@ import { map, switchMap, take, tap } from 'rxjs/operators';
 
 import { Sauce } from './sauce.model';
 import { Spicy } from './spicy.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { AccountService } from 'src/app/main/account/account.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,8 @@ export class PickyoursauceService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get sauces() {
@@ -33,6 +35,15 @@ export class PickyoursauceService {
   fetchFlavors() {
     return this.accountService.token.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: Sauce}>(`${environment.firebase.databaseURL}flavor.json?auth=${token}`)
       }),
@@ -59,6 +70,15 @@ export class PickyoursauceService {
   fetchSpicies() {
     return this.accountService.token.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: Spicy}>(`${environment.firebase.databaseURL}spicy.json?auth=${token}`);
       }),

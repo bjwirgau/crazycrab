@@ -5,8 +5,8 @@
     </ion-buttons>
     <ion-buttons slot="end">
       <ion-button (click)="finalizeOptions()">
-        Review
-        <ion-icon class="header-nav-button" name="chevron-forward-outline"></ion-icon>
+        <div id="review">Review</div>
+        <ion-icon id="review-button" class="header-nav-button" name="chevron-forward-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title class="ion-text-center">Customize Seafood</ion-title>
@@ -20,7 +20,7 @@
   <ion-grid *ngIf="!isLoading">
     <!-------------- Choose Your Flavor Menu -------------->
     <ion-row>
-      <ion-col size="12">
+      <ion-col size="12" class="option-row-title">
         <div class="ion-text-center">
           <ion-label class="option-title">Choose Your Flavor</ion-label>
         </div>
@@ -28,11 +28,13 @@
     </ion-row>
     <ion-row *ngFor="let flavor of loadedFlavors" [id]="flavor.id" (click)="selectSauce($event)">
       <ion-checkbox class="flavor option-input"></ion-checkbox>
-      <ion-col size="6">
-        <ion-icon name="bonfire-outline" size="large"></ion-icon>
+      <ion-col size="4">
+        <div class="ion-text-center">
+          <ion-icon name="bonfire-outline" size="large"></ion-icon>
+        </div>
       </ion-col>
-      <ion-col size="6">
-        <div class="ion-text-end">
+      <ion-col size="8">
+        <div class="ion-text-start">
           <span class="ion-margin option-row">{{ flavor.label }}</span>
         </div>
       </ion-col>
@@ -42,7 +44,7 @@
     <!-------------- Choose Your Spicy Menu -------------->
   <ion-grid *ngIf="!isLoading">
     <ion-row>
-      <ion-col size="12">
+      <ion-col size="12" class="option-row-title">
         <div class="ion-text-center">
           <ion-label class="option-title">Choose Your Spicy</ion-label>
         </div>
@@ -50,11 +52,13 @@
     </ion-row>
     <ion-row *ngFor="let spicy of loadedSpicy" [id]="spicy.id" (click)="selectSpicy($event)">
       <ion-checkbox class="spicy option-input"></ion-checkbox>
-      <ion-col size="6">
-        <ion-icon name="bonfire-outline" size="large"></ion-icon>
+      <ion-col size="4">
+        <div class="ion-text-center">
+          <ion-icon name="bonfire-outline" size="large"></ion-icon>
+        </div>
       </ion-col>
-      <ion-col size="6">
-        <div class="ion-text-end">
+      <ion-col size="8">
+        <div class="ion-text-start">
           <span class="ion-margin option-row">{{ spicy.label }}</span>
         </div>
       </ion-col>

@@ -33,6 +33,7 @@ export class LocationPage implements OnInit, AfterViewInit {
     });
 
     this.locationService.storeLocations.subscribe(locations => {
+      this.locationService.fetchNearbyLocations(locations);
       this.storeLocations = locations;
     });
   }
@@ -123,17 +124,17 @@ export class LocationPage implements OnInit, AfterViewInit {
 
       this.geolocation.getCurrentPosition().then((currentLocation) => {
         directionsRenderer.setMap(map);
-      let request = {
-        origin: new googleMaps.LatLng(currentLocation.coords.latitude, currentLocation.coords.longitude),
-        destination: southfieldLocation,
-        travelMode: googleMaps.TravelMode["DRIVING"]
-      };
+        let request = {
+          origin: new googleMaps.LatLng(currentLocation.coords.latitude, currentLocation.coords.longitude),
+          destination: southfieldLocation,
+          travelMode: googleMaps.TravelMode["DRIVING"]
+        };
 
-      directionsService.route(request, function(response, status) {
-        if (status == 'OK'){
-          directionsRenderer.setDirections(response);
-        }
-      })
+        directionsService.route(request, function(response, status) {
+          if (status == 'OK'){
+            directionsRenderer.setDirections(response);
+          }
+        })
       }).catch((err) => {
         console.log('Error getting location.', err);
       });

@@ -12,7 +12,7 @@
           <ion-list>
             <ion-item>
               <ion-label position="floating">E-Mail</ion-label>
-              <ion-input type="email" ngModel name="email" required email #emailCtrl="ngModel"></ion-input>
+              <ion-input class="username" type="email" ngModel name="email" required email #emailCtrl="ngModel"></ion-input>
             </ion-item>
             <ion-item *ngIf="!emailCtrl.valid && emailCtrl.touched" lines="none">
               <ion-label>
@@ -49,6 +49,13 @@
           routerLink="/main/tabs/account/signup">
             Sign Up
           </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6" offset="3" class="ion-text-center">
+          <ion-list>
+            <a routerLink="/main/tabs/account/forgotpassword">Forgot Password?</a>
+          </ion-list>
         </ion-col>
       </ion-row>
     </ion-grid>

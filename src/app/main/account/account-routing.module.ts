@@ -21,6 +21,10 @@ const routes: Routes = [
     path: 'accountdetails',
     loadChildren: () => import('./accountdetails/accountdetails.module').then( m => m.AccountdetailsPageModule),
     canLoad: [AccountGuard]
+  },
+  {
+    path: 'forgotpassword',
+    loadChildren: () => import('./forgotpassword/forgotpassword.module').then( m => m.ForgotpasswordPageModule)
   }
 ];
 

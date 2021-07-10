@@ -5,8 +5,8 @@
     </ion-buttons>
     <ion-buttons slot="end">
       <ion-button (click)="chooseSauce()">
-        Sauce
-        <ion-icon class="header-nav-button" name="chevron-forward-outline"></ion-icon>
+        <div id="choose-sauce">Sauce</div>
+        <ion-icon id="choose-sauce-button" class="header-nav-button" name="arrow-forward-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title class="ion-text-center">
@@ -30,15 +30,15 @@
                   </ion-col>
                   <ion-col>
                     <ion-grid class="ion-no-padding">
-                      <ion-row> 
-                        <ion-col size="6" class="chooseyourown">
+                      <ion-row class="seafood-selection"> 
+                        <ion-col size="6" class="seafood-name">
                           {{ seafood.name }} <br>
                           <div class="pricing">
                             {{ seafood.price | currency }} / pound
                           </div>
                         </ion-col>
                         <ion-col size="2">
-                          <ion-button type="button" [id]="'button-'+seafood.id+'-remove'" class="seafood-button-remove" color="tertiary" size="small" (click)="reduceSeafood($event, seafood)">-</ion-button>
+                          <ion-button type="button" [id]="'button-'+seafood.id+'-remove'" class="seafood-button-remove" color="tertiary" size="large" (click)="reduceSeafood($event, seafood)">-</ion-button>
                         </ion-col>
                         <ion-col size="2" class="ion-no-padding">
                           <ion-item lines="none" class="ion-no-padding">
@@ -47,12 +47,16 @@
                           </ion-item>
                         </ion-col>
                         <ion-col size="2">
-                          <ion-button type="button" [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="small" (click)="addSeafood($event, seafood)">+</ion-button>
+                          <ion-button type="button" [id]="'button-'+seafood.id+'-add'" class="seafood-button" color="primary" size="large" (click)="addSeafood($event, seafood)">+</ion-button>
                         </ion-col>
-                        <ion-col offset="7" size="5">
-                          <ion-item lines="none" class="ion-no-padding">
-                            <ion-label class="ion-no-padding">Subtotal:</ion-label>
-                            <ion-input class="ion-no-padding" [id]="seafood.id+'-subtotal'" [name]="seafood.id+'-subtotal'" ngModel #inputCtrl="ngModel" disabled></ion-input>
+                      </ion-row>
+                      <ion-row>
+                        <ion-col offset="6" size="6">
+                          <ion-item lines="none" class="ion-no-padding seafood-subtotal">
+                            <div class="subtotal-label">
+                              <ion-label>Subtotal:</ion-label>
+                            </div>
+                            <ion-input [id]="seafood.id+'-subtotal'" [name]="seafood.id+'-subtotal'" ngModel #inputCtrl="ngModel" disabled></ion-input>
                           </ion-item>
                         </ion-col>
                       </ion-row>

@@ -1,32 +1,38 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title class="ion-text-center">Account Details</ion-title>
+    <ion-buttons slot="start" *ngIf="loadedAccountDetails && loadedAccountDetails.isAdmin">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-segment (ionChange)="onSegmentChange($event)" value="general">
-    <ion-segment-button value="general">General</ion-segment-button>
-    <ion-segment-button value="order-history">Order History</ion-segment-button>
-  </ion-segment>
-  <div *ngIf="accountView == 'general'">
-    <form #f="ngForm" (ngSubmit)="onSubmit(f)">
-      <ion-list *ngFor="let accountDetails of loadedAccountDetails">
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner></ion-spinner>
+  </div>
+  <div *ngIf="!isLoading && loadedAccountDetails">
+    <ion-segment (ionChange)="onSegmentChange($event)" value="general">
+      <ion-segment-button value="general">General</ion-segment-button>
+      <ion-segment-button value="order-history">Order History</ion-segment-button>
+    </ion-segment>
+    <div *ngIf="accountView == 'general'">
+      <form #f="ngForm" (ngSubmit)="onSubmit(f)">
         <ion-item >
           <ion-label>EMAIL</ion-label>
-          <ion-input name="email" type="email" email [(ngModel)]="accountDetails.email" #emailCtrl="ngModel" disabled></ion-input>
+          <ion-input name="email" type="email" email [(ngModel)]="loadedAccountDetails.email" #emailCtrl="ngModel" disabled></ion-input>
         </ion-item>
         <ion-item >
           <ion-label>FIRST NAME</ion-label>
-          <ion-input name="firstName" disabled [(ngModel)]="accountDetails.firstname"></ion-input>
+          <ion-input name="firstName" disabled [(ngModel)]="loadedAccountDetails.firstname"></ion-input>
         </ion-item>
         <ion-item >
           <ion-label>LAST NAME</ion-label>
-          <ion-input name="lastName" disabled [(ngModel)]="accountDetails.lastname"></ion-input>
+          <ion-input name="lastName" disabled [(ngModel)]="loadedAccountDetails.lastname"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label>MY STORE</ion-label>
-          <ion-select name="store" interface="popover" [compareWith]="compareWith" value="{{accountDetails.defaultStore}}" [(ngModel)]="defaultLocation" #storeCtrl="ngModel">
+          <ion-select name="store" interface="popover" [compareWith]="compareWith" value="{{loadedAccountDetails.defaultStore}}" [(ngModel)]="defaultLocation" #storeCtrl="ngModel">
             <ion-select-option [value]="location.storeId" [disabled]="!location.open" *ngFor="let location of loadedLocations">{{location.title}}</ion-select-option>
           </ion-select>
         </ion-item>
@@ -34,26 +40,26 @@
         <ion-button type="submit" color="warning" expand="full" *ngIf="!updating && !updated">Update Settings</ion-button>
         <ion-button type="submit" color="warning" expand="full" *ngIf="updating" disabled><ion-spinner name="dots"></ion-spinner></ion-button>
         <ion-button type="button" color="danger" expand="full" (click)="logout()">Sign Out</ion-button>
-      </ion-list>
-    </form>
-  </div>
-  <div *ngIf="accountView == 'order-history'">
-    <ion-grid *ngFor="let order of loadedOrders">
-      <ion-row (click)="onOrderDetailsView(order)">
-        <ion-col>
-          <ion-item detail>
-            <ion-grid class="ion-no-padding">
-              <ion-row>
-                <ion-col>Order {{ order.orderId }}</ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col>{{order.createdAt | date: 'M/d/yy, h:mm a'}}</ion-col>
-              </ion-row>
-            </ion-grid>
-            <p style="float:right">{{ order.grandTotal | currency }}</p>
-          </ion-item>
-        </ion-col>
-       </ion-row>
-    </ion-grid>
+      </form>
+    </div>
+    <div *ngIf="accountView == 'order-history'">
+      <ion-grid *ngFor="let order of loadedOrders">
+        <ion-row (click)="onOrderDetailsView(order)">
+          <ion-col>
+            <ion-item detail>
+              <ion-grid class="ion-no-padding">
+                <ion-row>
+                  <ion-col>Order {{ order.orderId }}</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>{{order.createdAt | date: 'M/d/yy, h:mm a'}}</ion-col>
+                </ion-row>
+              </ion-grid>
+              <p style="float:right">{{ order.grandTotal | currency }}</p>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
   </div>
 </ion-content>

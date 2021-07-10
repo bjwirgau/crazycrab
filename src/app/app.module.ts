@@ -12,6 +12,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 import { Stripe } from '@ionic-native/stripe/ngx';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+
+import { environment } from 'src/environments/environment';
 
 
 @NgModule({
@@ -21,7 +24,8 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
     BrowserModule,
     IonicModule.forRoot(), 
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    AngularFireAuthModule
   ],
   providers: [
     StatusBar,

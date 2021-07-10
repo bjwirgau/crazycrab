@@ -63,12 +63,13 @@ export class SignupPage implements OnInit {
               message = 'Too many attempts. Try again later.'
           }
 
-          this.showError(message);
+          this.showError(message, errorReponse);
         });
       });
   }
 
-  private showError(message: string){
+  private showError(message: string, errorReponse){
+    console.log(errorReponse);
     this.alertCtrl.create({
       header: 'Authentication Failed',
       message: message,

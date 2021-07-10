@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { MainPage } from './main.page';
 import { AccountGuard } from './account/account.gaurd';
+import { AdminGuard } from './account/admin.gaurd';
 
 const routes: Routes = [
   {
@@ -33,7 +34,25 @@ const routes: Routes = [
         loadChildren: () => import('./cart/cart.module').then( m => m.CartPageModule),
         canLoad: [AccountGuard]
       },
+      {
+        path: 'orders',
+        loadChildren: () => import('./orders/orders.module').then( m => m.OrdersPageModule),
+        canLoad: [AdminGuard]
+      },
+      {
+        path: 'config',
+        loadChildren: () => import('./config/config.module').then( m => m.ConfigPageModule),
+        canLoad: [AdminGuard]
+      }
     ]
+  },
+  {
+    path: 'orders',
+    loadChildren: () => import('./orders/orders.module').then( m => m.OrdersPageModule)
+  },
+  {
+    path: 'config',
+    loadChildren: () => import('./config/config.module').then( m => m.ConfigPageModule)
   }
 ];
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { NEVER, Subscription } from 'rxjs';
 
 import { QuoteItem } from './quoteitem.model';
 import { AccountService } from '../account/account.service';
@@ -31,6 +31,7 @@ export class QuoteitemService {
   private _quoteItems = new BehaviorSubject<QuoteItem[]>([]);
 
   private quoteItemsSubscription = Subscription
+  router: any;
 
   constructor(
     private accountService: AccountService,
@@ -69,7 +70,16 @@ export class QuoteitemService {
     let quoteItem: QuoteItem;
     let fetchedUserId: string;
     return this.accountService.userId.pipe(
-      take(1), 
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }), 
       switchMap(userId => {
         if (!userId) {
           throw new Error('No user id found!');
@@ -116,6 +126,15 @@ export class QuoteitemService {
     let fetchedUserId: string;
     return this.accountService.userId.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(userId => {
         if(!userId){
           throw new Error('User id not found.');
@@ -182,6 +201,15 @@ export class QuoteitemService {
         return this.accountService.token;
       }),
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         const updatedQuoteItemIndex = fetchedQuoteItems.findIndex(item => item.id === oldQuoteItem.id);
         updatedQuoteItems = [...fetchedQuoteItems];

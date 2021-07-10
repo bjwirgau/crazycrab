@@ -9,6 +9,8 @@ import { take, switchMap, tap, map } from 'rxjs/operators';
 import { Quote } from './quote.model'
 import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { TaxRate } from './taxrate.model';
+import { Router } from '@angular/router';
+import { NEVER } from 'rxjs';
 
 
 interface TaxData {
@@ -46,7 +48,8 @@ export class QuoteService {
   constructor(
     private httpClient: HttpClient,
     private quoteItemService: QuoteitemService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get quote() {
@@ -143,6 +146,15 @@ export class QuoteService {
       }),
       take(1),
       switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
         return this.httpClient.get<{[key: string]: QuoteData}>(`${environment.firebase.databaseURL}quote.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`)
         .pipe(
           map(resData => {
@@ -190,6 +202,15 @@ export class QuoteService {
       switchMap(quote => {
         fetchedQuote = quote;
         return this.accountService.token;
+      }),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
       }),
       switchMap(token => {
 

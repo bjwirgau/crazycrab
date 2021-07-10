@@ -8,7 +8,8 @@ import { environment } from 'src/environments/environment';
 import { Order } from './order.model';
 import { take, switchMap, tap, map } from 'rxjs/operators';
 import { OrderItem } from './orderitem.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 interface OrderItemData {
   createdAt: Date,
@@ -35,7 +36,8 @@ export class OrderService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get orderItems() {
@@ -71,6 +73,15 @@ export class OrderService {
         return this.accountService.token;
       }),
       switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
         return this.httpClient.post<{ id: string }>(
           `${environment.firebase.databaseURL}order.json?auth=${token}`,
           {...order, id: null}
@@ -92,6 +103,15 @@ export class OrderService {
 
         fetchedUserId = userId;
         return this.accountService.token;
+      }),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
       }),
       switchMap(token => {
         let orderItem = new OrderItem(
@@ -141,6 +161,15 @@ export class OrderService {
         return this.accountService.token;
       }),
       switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
         return this.httpClient
           .get<{[key: string]: OrderItemData}>(
             `${environment.firebase.databaseURL}order-item.json?orderBy="orderId"&equalTo=${orderId}&auth=${token}`
@@ -179,6 +208,16 @@ export class OrderService {
   
   fetchLatestOrder(){
     return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token =>{
         return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&limitToLast=1&auth=${token}`)
       }),
@@ -210,6 +249,16 @@ export class OrderService {
 
   fetchRecentOrders(overFlowTime: string) {
     return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&startAt="${overFlowTime}"&auth=${token}`)
       }),

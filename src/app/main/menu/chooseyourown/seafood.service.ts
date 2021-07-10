@@ -3,8 +3,9 @@ import { Seafood, CustomizedSeafood } from './seafood.model';
 import { map, tap, take, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { AccountService } from '../../account/account.service';
+import { Router } from '@angular/router';
 
 interface SeafoodData {
   name: string,
@@ -21,7 +22,8 @@ export class SeafoodService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get seafood() {
@@ -35,6 +37,15 @@ export class SeafoodService {
   fetchSeafood() {
     return this.accountService.token.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: SeafoodData }>(`${environment.firebase.databaseURL}chooseyourown.json?auth=${token}`)
       }),

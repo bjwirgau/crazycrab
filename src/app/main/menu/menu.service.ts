@@ -5,9 +5,10 @@ import { MenuItem } from './menu-item.model';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { LunchAvailability } from './lunch-availability.model';
 import { AccountService } from '../account/account.service'
+import { Router } from '@angular/router';
 
 interface MenuData {
   title: string,
@@ -32,7 +33,8 @@ export class MenuService {
 
   constructor(
     private httpClient: HttpClient,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   get menuItems() {
@@ -50,6 +52,15 @@ export class MenuService {
   fetchMenuItems(category: string = 'menu') {
     return this.accountService.token.pipe(
       take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
       switchMap(token => {
         return this.httpClient.get<{[key: string]: MenuData }>(`${environment.firebase.databaseURL}${category}.json?auth=${token}`)
       }),

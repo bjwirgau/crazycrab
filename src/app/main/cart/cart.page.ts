@@ -28,7 +28,7 @@ export class CartPage implements OnInit {
   quoteItems: QuoteItem[];
   quote: Quote[];
   loadedLocations: StoreLocation[];
-  loadedAccountDetails: AccountDetails[];
+  loadedAccountDetails: AccountDetails;
   availabilityConfiguration: AvailabilityConfiguration[];
   availableTimes: Date[] = [];
   selectedCheckbox;
