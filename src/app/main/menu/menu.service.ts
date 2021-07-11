@@ -17,8 +17,8 @@ interface MenuData {
 }
 
 interface LunchAvailabilityData {
-  start: string,
-  end: string
+  start: number,
+  end: number
 }
 
 @Injectable({

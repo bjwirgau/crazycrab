@@ -214,8 +214,8 @@ export class ProductPage implements OnInit, OnDestroy {
       return false;
     }
 
-    return currentHour >= parseInt(this.menuService.lunchAvailability.getValue().start)/100
-        && currentHour <= parseInt(this.menuService.lunchAvailability.getValue().end)/100;
+    return currentHour >= this.menuService.lunchAvailability.getValue().start/100
+        && currentHour <= this.menuService.lunchAvailability.getValue().end/100;
   }
 
 }
