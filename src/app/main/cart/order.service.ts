@@ -10,6 +10,7 @@ import { take, switchMap, tap, map } from 'rxjs/operators';
 import { OrderItem } from './orderitem.model';
 import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { Router } from '@angular/router';
+import { AccountdetailsService } from '../account/accountdetails/accountdetails.service';
 
 interface OrderItemData {
   createdAt: Date,
@@ -37,6 +38,7 @@ export class OrderService {
   constructor(
     private httpClient: HttpClient,
     private accountService: AccountService,
+    private accountDetailsService: AccountdetailsService,
     private router: Router
   ) { }
 
@@ -50,6 +52,9 @@ export class OrderService {
       Math.random().toString(),
       orderId,
       '',
+      '',
+      '',
+      `${environment.orderStatuses.new}`,   
       new Date(),
       new Date(),
       Math.round((quote.taxRate+Number.EPSILON)*100)/100,
@@ -70,6 +75,16 @@ export class OrderService {
         order.userId = userId;
         fetchedUserId = userId;
 
+        return this.accountDetailsService.accountdetails;
+      }),
+      switchMap(accountDetails => {
+        if (!accountDetails) {
+          throw new Error('Error creating order. Failed to retrieve account details.');
+        }
+
+        order.firstname = accountDetails.firstname;
+        order.lastname = accountDetails.lastname;
+        
         return this.accountService.token;
       }),
       switchMap(token => {
@@ -230,6 +245,9 @@ export class OrderService {
               key,
               resData[key].orderId,
               resData[key].userId,
+              resData[key].firstname,
+              resData[key].lastname,
+              resData[key].status,
               resData[key].createdAt,
               resData[key].updatedAt,
               resData[key].taxRate,
@@ -271,6 +289,9 @@ export class OrderService {
               key,
               resData[key].orderId,
               resData[key].userId,
+              resData[key].firstname,
+              resData[key].lastname,
+              resData[key].status,
               resData[key].createdAt,
               resData[key].updatedAt,
               resData[key].taxRate,
@@ -284,6 +305,75 @@ export class OrderService {
         }
 
         return order;
+      })
+    )
+  }
+
+  fetchOrdersByStatus(status: string) {
+    return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token =>{
+        if (status == 'complete') {
+          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="status"&equalTo="${status}"&auth=${token}`)
+        } else {
+          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="status"&equalTo="${status}"&auth=${token}`)
+        }
+      }),
+      map(resData => {
+        const order:Order[] = [];
+
+        for (const key in resData){
+          if (resData.hasOwnProperty(key)){
+            order.push(new Order(
+              key,
+              resData[key].orderId,
+              resData[key].userId,
+              resData[key].firstname,
+              resData[key].lastname,
+              resData[key].status,
+              resData[key].createdAt,
+              resData[key].updatedAt,
+              resData[key].taxRate,
+              resData[key].taxAmount,
+              resData[key].subTotal,
+              resData[key].grandTotal,
+              resData[key].deliveryMethod,
+              resData[key].prepTime
+            ))
+          }
+        }
+
+        return order;
+      })
+    )
+  }
+
+  updateOrder(order: Order) {
+    return this.accountService.token.pipe(
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          this.accountService.logout();
+          this.router.navigateByUrl('/main/tabs/account');
+          return NEVER;
+        } else {
+          return of(token);
+        }
+      }),
+      switchMap(token => {
+        return this.httpClient.put<{ id: string }>(
+          `${environment.firebase.databaseURL}order/${order.id}.json?auth=${token}`,
+          {...order, id: null}
+        );
       })
     )
   }

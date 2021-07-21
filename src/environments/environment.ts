@@ -24,6 +24,11 @@ export const environment = {
   },
   ziptax: {
     key: 'YSQJxyvt5NG3OWgB'
+  },
+  orderStatuses: {
+    new: 'new',
+    pending: 'pending',
+    complete: 'complete'
   }
 };
 

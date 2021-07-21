@@ -122,7 +122,7 @@
         <ion-list *ngIf="!isAccountLoading">
           <ion-item lines="none">
             <ion-label>Store</ion-label>
-            <ion-select name="store" interface="popover" [value]="loadedAccountDetails[0].defaultStore">
+            <ion-select name="store" interface="popover" [value]="loadedAccountDetails.defaultStore">
               <ion-select-option [value]="location.storeId" [disabled]="!location.open" *ngFor="let location of loadedLocations">{{location.title}}</ion-select-option>
             </ion-select>
           </ion-item>

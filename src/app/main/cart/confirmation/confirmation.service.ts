@@ -33,10 +33,10 @@ export class ConfirmationService {
               return this.httpClient.post(
                 `${environment.firebase.cloudFunctionsUrl}sendConfirmation`, 
                 {
-                  firstname: accountDetails[0].firstname,
-                  lastname: accountDetails[0].lastname,
+                  firstname: accountDetails.firstname,
+                  lastname: accountDetails.lastname,
                   orderId: order[0].orderId,
-                  recipientEmail: accountDetails[0].email,
+                  recipientEmail: accountDetails.email,
                   orderDate: new Date(order[0].createdAt).toLocaleString('en-US', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }),
                   subtotal: order[0].subTotal.toString(),
                   tax: order[0].taxAmount.toString(),

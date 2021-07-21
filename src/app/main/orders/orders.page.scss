@@ -1,5 +1,40 @@
-.drop-area {
-    width: 300px;
-    background: #fff;
+.item-group {
+    // margin-top: 160px;
+    width: 33%;
     display: inline-block;
+    vertical-align: top;
+}
+
+.item-background-color.team-a {
+    // background-color: blue !important;
+    --ion-item-background: #f08080;
+    border: 2px solid #000;
+    margin: 2px;
+    z-index: 1;
+}
+
+.item-background-color.team-b {
+    // background-color: blue !important;
+    --ion-item-background: #e4d68a;
+    border: 2px solid #000;
+    margin: 2px;
+    z-index: 1;
+}
+
+.item-background-color.team-C {
+    // background-color: blue !important;
+    --ion-item-background: #b4f0c8;
+    border: 2px solid #000;
+    margin: 2px;
+    z-index: 1;
+}
+
+.team-background-color {
+    --ion-item-background: transparent;
+    z-index: 1;
+}
+
+.team-items {
+    z-index: 1;
+    position: relative;
 }

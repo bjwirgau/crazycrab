@@ -67,24 +67,6 @@ export class AccountdetailsService {
                 accountData.defaultStore,
                 accountData.isAdmin
               )
-              // const accountDetails:AccountDetails[] = [];
-
-              // for (const key in accountDetailData) {
-              //   if (accountDetailData.hasOwnProperty(key)) {
-                  
-              //     accountDetails.push(
-              //       new AccountDetails(
-              //         key,
-              //         accountDetailData[key].email,
-              //         accountDetailData[key].firstname,
-              //         accountDetailData[key].lastname,
-              //         accountDetailData[key].defaultStore,
-              //         accountDetailData[key].isAdmin
-              //       )
-              //     );
-              //   }
-              // }
-              return accountData;
             }),
             tap(accountDetails => {
               this._accountdetails.next(accountDetails);
@@ -120,6 +102,9 @@ export class AccountdetailsService {
                   key,
                   resData[key].orderId,
                   resData[key].userId,
+                  resData[key].firstname,
+                  resData[key].lastname,
+                  resData[key].status,
                   resData[key].createdAt,
                   resData[key].updatedAt,
                   resData[key].taxRate,

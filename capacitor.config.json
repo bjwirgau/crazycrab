@@ -9,5 +9,20 @@
       "launchShowDuration": 0
     }
   },
-  "cordova": {}
+  "cordova": {
+    "preferences": {
+      "ScrollEnabled": "false",
+      "android-minSdkVersion": "19",
+      "BackupWebStorage": "none",
+      "SplashMaintainAspectRatio": "true",
+      "ShowSplashScreenSpinner": "false",
+      "FadeSplashScreen": "true",
+      "FadeSplashScreenDuration": "300",
+      "AutoHideSplashScreen": "false",
+      "SplashShowOnlyFirstTime": "false",
+      "ShowSplashScreen": "true",
+      "SplashScreen": "screen",
+      "SplashScreenDelay": "3000"
+    }
+  }
 }

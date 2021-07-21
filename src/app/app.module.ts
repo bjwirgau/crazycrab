@@ -15,10 +15,13 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 
 import { environment } from 'src/environments/environment';
+import { BoardService } from './components/board/board.service';
 
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent
+  ],
   entryComponents: [],
   imports: [
     BrowserModule,
@@ -33,6 +36,7 @@ import { environment } from 'src/environments/environment';
     HTTP,
     Stripe,
     Geolocation,
+    BoardService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

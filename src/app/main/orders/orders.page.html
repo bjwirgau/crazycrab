@@ -7,35 +7,48 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  
-    <div class="drop-area" #newItemsDropzone>
-      <div class="drop-title">New Items</div>
-      <div class="item-group">
-        <ion-card *ngFor="let newItem of newItems" class="complete-items">
-          <ion-card-header>
-            <ion-card-subtitle>New Item {{ newItem.id }}</ion-card-subtitle>
-            <ion-card-title>{{ newItem.name }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            Item Content
-          </ion-card-content>
-        </ion-card>
-      </div>
+<ion-content [scrollY]="contentScrollActive">
+
+  <!-- New Orders-->
+  <div id="new-status" class="item-group team-b" #newDropzone>
+    <div class="team-name">
+      <ion-item lines="none" class="team-background-color">
+        New Orders
+      </ion-item>
     </div>
-    <div class="drop-area" #completeItemsDropzone>
-      <div class="drop-title">Complete Items</div>
-      <div class="item-group">
-        <ion-card *ngFor="let completeItem of completeItems" class="complete-items">
-          <ion-card-header>
-            <ion-card-subtitle>Complete Item {{ completeItem.id }}</ion-card-subtitle>
-            <ion-card-title>{{ completeItem.name }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            Item Content
-          </ion-card-content>
-        </ion-card>
-      </div>
+    <div #newItems *ngFor="let order of newOrders" class="team-items">
+      <ion-item class="item-background-color team-a" lines="none">
+        Order {{ order.orderId }}
+      </ion-item>
     </div>
+  </div>
+
+  <!-- Pending Orders -->
+  <div id="pending-status" class="item-group team-b" #pendingDropzone>
+    <div class="team-name">
+        <ion-item lines="none" class="team-background-color">
+          Pending Orders
+        </ion-item>
+    </div>
+    <div #pendingItems *ngFor="let order of pendingOrders" class="team-items">
+      <ion-item class="item-background-color team-b" lines="none">
+        Order {{ order.orderId }}
+      </ion-item>
+    </div>
+  </div>
+
+  <!-- Complete Orders -->
+  <div id="complete-status" class="item-group team-C" #completeDropzone>
+    <div class="team-name">
+        <ion-item lines="none" class="team-background-color">
+          Complete Orders
+        </ion-item>
+    </div>
+    <div #completeItems *ngFor="let order of completeOrders" class="team-items">
+      <ion-item class="item-background-color team-C" lines="none">
+        Order {{ order.orderId }}
+      </ion-item>
+    </div>
+  </div>
 
 </ion-content>
