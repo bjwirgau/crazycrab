@@ -17,37 +17,72 @@
       </ion-item>
     </div>
     <div #newItems *ngFor="let order of newOrders" class="team-items">
-      <ion-item class="item-background-color team-a" lines="none">
-        Order {{ order.orderId }}
-      </ion-item>
+      <ion-card class="item-background-color team-a" lines="none">
+        <ion-card-header>
+          <ion-card-title>
+            # {{ order.orderId }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ order.firstname }} {{ order.lastname }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <app-order-items [orderId]="order.orderId"></app-order-items>
+          <!-- <div class="order-items" *ngFor="orderItem of orderItems">
+            <div class="order-item" *ngIf="orderItem.orderId == order.orderId">
+                {{ orderItem.itemName }}
+            </div>
+          </div> -->
+        </ion-card-content>
+      </ion-card>
     </div>
   </div>
 
   <!-- Pending Orders -->
   <div id="pending-status" class="item-group team-b" #pendingDropzone>
     <div class="team-name">
-        <ion-item lines="none" class="team-background-color">
-          Pending Orders
-        </ion-item>
+      <ion-item lines="none" class="team-background-color">
+        Pending Orders
+      </ion-item>
     </div>
     <div #pendingItems *ngFor="let order of pendingOrders" class="team-items">
-      <ion-item class="item-background-color team-b" lines="none">
-        Order {{ order.orderId }}
-      </ion-item>
+      <ion-card class="item-background-color team-b" lines="none">
+        <ion-card-header>
+          <ion-card-title>
+            # {{ order.orderId }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ order.firstname }} {{ order.lastname }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <app-order-items [orderId]="order.orderId"></app-order-items>
+        </ion-card-content>
+      </ion-card>
     </div>
   </div>
 
   <!-- Complete Orders -->
   <div id="complete-status" class="item-group team-C" #completeDropzone>
     <div class="team-name">
-        <ion-item lines="none" class="team-background-color">
-          Complete Orders
-        </ion-item>
+      <ion-item lines="none" class="team-background-color">
+        Complete Orders
+      </ion-item>
     </div>
     <div #completeItems *ngFor="let order of completeOrders" class="team-items">
-      <ion-item class="item-background-color team-C" lines="none">
-        Order {{ order.orderId }}
-      </ion-item>
+      <ion-card class="item-background-color team-C" lines="none">
+        <ion-card-header>
+          <ion-card-title>
+            # {{ order.orderId }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ order.firstname }} {{ order.lastname }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <app-order-items [orderId]="order.orderId"></app-order-items>
+        </ion-card-content>
+      </ion-card>
     </div>
   </div>
 

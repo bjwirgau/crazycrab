@@ -1,20 +1,24 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; 
 import { IonicModule } from '@ionic/angular';
+import { OrderItemOptionsComponent } from './order-items/order-item-options/order-item-options.component';
+import { OrderItemsComponent } from './order-items/order-items.component';
 
 import { OrdersPageRoutingModule } from './orders-routing.module';
 import { OrdersPage } from './orders.page';
-import { BoardModule } from 'src/app/components/board/board.module';
 
 @NgModule({
   imports: [
+    CommonModule,
     FormsModule,
     IonicModule,
-    OrdersPageRoutingModule,
-    BoardModule
+    OrdersPageRoutingModule
   ],
   declarations: [
-    OrdersPage
+    OrdersPage,
+    OrderItemsComponent,
+    OrderItemOptionsComponent
   ]
 })
 export class OrdersPageModule {}

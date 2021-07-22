@@ -1,0 +1,6 @@
+<div *ngFor="let orderItem of orderItems">
+  {{ orderItem.itemName }} x {{ orderItem.itemQuantity }}
+  <app-order-item-options [options]="orderItem.itemOptions"></app-order-item-options>
+  <hr class="solid">
+</div>
+

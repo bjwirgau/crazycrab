@@ -38,6 +38,7 @@ export class PaymentPage implements OnInit, OnDestroy {
   private removeQuoteItemSubscription: Subscription;
   private removeQuoteSubscription: Subscription;
   private orderCreateSubscription: Subscription;
+  private fetchOrderSubscription: Subscription;
 
   cardBrandToPfClass = {
     'visa': 'pf-visa',
@@ -192,11 +193,11 @@ export class PaymentPage implements OnInit, OnDestroy {
             this.paymentComplete = true;
             let orderId: number;
             
-            this.orderService.fetchLatestOrder().subscribe(order => {
-              orderId = order.length === 1 ? order[0].orderId+1 : 1;
+            this.fetchOrderSubscription = this.orderService.fetchLatestOrder().subscribe(order => {
+              orderId = order.length === 0 ? 1 : order[0].orderId+1;
               this.orderCreateSubscription = this.orderService.createOrder(this.loadedQuote, orderId).subscribe(() => {
                 this.orderService.createOrderItems(self.loadedQuoteItems, orderId);
-                this.orderService.fetchOrderItems(order[0].orderId).subscribe(() => {
+                this.orderService.fetchOrderItems(orderId).subscribe(() => {
                   //clear cart items
 
                   this.quoteItemSubscription = this.quoteItemService.quoteItems.subscribe(quoteItems => {
@@ -216,6 +217,7 @@ export class PaymentPage implements OnInit, OnDestroy {
                 });
                 this.orderCreateSubscription.unsubscribe();
               });
+              this.fetchOrderSubscription.unsubscribe();
             });
           } else if(data.hasOwnProperty('type') && (data['type'] === STRIPE_CARD_ERROR ) || data['statusCode'] === 400) {
             console.log(data['raw']['message']);

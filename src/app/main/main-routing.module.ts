@@ -45,14 +45,6 @@ const routes: Routes = [
         canLoad: [AdminGuard]
       }
     ]
-  },
-  {
-    path: 'orders',
-    loadChildren: () => import('./orders/orders.module').then( m => m.OrdersPageModule)
-  },
-  {
-    path: 'config',
-    loadChildren: () => import('./config/config.module').then( m => m.ConfigPageModule)
   }
 ];
 

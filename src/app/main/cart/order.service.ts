@@ -55,8 +55,8 @@ export class OrderService {
       '',
       '',
       `${environment.orderStatuses.new}`,   
-      new Date(),
-      new Date(),
+      new Date().getTime(),
+      new Date().getTime(),
       Math.round((quote.taxRate+Number.EPSILON)*100)/100,
       Math.round((quote.taxAmount+Number.EPSILON)*100)/100,
       Math.round((quote.subTotal+Number.EPSILON)*100)/100,
@@ -323,9 +323,11 @@ export class OrderService {
       }),
       switchMap(token =>{
         if (status == 'complete') {
-          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="status"&equalTo="${status}"&auth=${token}`)
+          const dateFilter = new Date().setHours(new Date().getHours() - 24);
+          
+          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="createdAt"&startAt="${dateFilter}"&auth=${token}`);
         } else {
-          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="status"&equalTo="${status}"&auth=${token}`)
+          return this.httpClient.get<{[key: string]: Order}>(`${environment.firebase.databaseURL}order.json?orderBy="status"&equalTo="${status}"&auth=${token}`);
         }
       }),
       map(resData => {
