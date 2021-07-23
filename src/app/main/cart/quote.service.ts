@@ -77,10 +77,6 @@ export class QuoteService {
   }
 
   /**
-   * 
-   * @todo Quote is created twice if user session expires. Need to verify customer session and redirect to login page if session is invalid. Unsure of how to reproduce. Attempted to clear auth data in browser but behaved normally. May just leave page/session alone for extended time and retry.
-   * 
-   * 
    * @param totalProductPrice 
    */
   createQuote(totalProductPrice: number){
@@ -213,8 +209,6 @@ export class QuoteService {
         }
       }),
       switchMap(token => {
-
-        // let subtotal = quote.subTotal + totalProductPrice;
         let grandtotal = subtotal + taxAmount;
 
         updatedQuote = new Quote(
@@ -263,7 +257,6 @@ export class QuoteService {
     if (this._taxRate.getValue()){
       this._taxAmount.next(subtotal * this._taxRate.getValue()['rate']['stateUseTax']);
       this._grandTotal.next(subtotal + this._taxAmount.getValue());
-      // this.updateQuote(subtotal, this._taxRate.getValue().rate.stateUseTax, this._taxAmount.getValue(), this._quote.getValue().deliveryMethod).subscribe()  ;
     }
   }
 

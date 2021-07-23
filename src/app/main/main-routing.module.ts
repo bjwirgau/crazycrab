@@ -43,6 +43,16 @@ const routes: Routes = [
         path: 'config',
         loadChildren: () => import('./config/config.module').then( m => m.ConfigPageModule),
         canLoad: [AdminGuard]
+      },
+      {
+        path: 'users',
+        loadChildren: () => import('./users/users.module').then( m => m.UsersPageModule),
+        canLoad: [AdminGuard]
+      },
+      {
+        path: 'stores',
+        loadChildren: () => import('./stores/stores.module').then( m => m.StoresPageModule),
+        canLoad: [AdminGuard]
       }
     ]
   }

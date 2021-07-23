@@ -69,7 +69,7 @@ export class LocationService {
         }
       }),
       switchMap(token => {
-        return this.httpClient.get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-configuration/store-addresses.json?auth=${token}`)
+        return this.httpClient.get<{[key: string]: StoreLocationData }>(`${environment.firebase.databaseURL}store-addresses.json?auth=${token}`)
       }),
       map(resData => {
         const storeLocations = [];
@@ -114,19 +114,19 @@ export class LocationService {
         }
       }),
       switchMap(token => {
-        return this.httpClient.get<{[key: string]: AvailabilityConfigurationInterface }>(`${environment.firebase.databaseURL}store-configuration/availability.json?auth=${token}`)
+        return this.httpClient.get<{[key: string]: AvailabilityConfigurationInterface }>(`${environment.firebase.databaseURL}store-configuration.json?auth=${token}`)
       }),
       map(resData => {
         let availabilityConfiguration = [];
-        for (const key in resData) {
-          if (resData.hasOwnProperty(key)) {
+        for (const key in resData.availability) {
+          if (resData.availability.hasOwnProperty(key)) {
             availabilityConfiguration.push( new AvailabilityConfiguration(
-              resData[key].enabled,
-              resData[key].availabilityInterval,
-              resData[key].baseLeadTime,
-              resData[key].overflowThreshold,
-              resData[key].overflowInterval,
-              resData[key].overflowLeadTime
+              resData.availability[key].enabled,
+              resData.availability[key].availabilityInterval,
+              resData.availability[key].baseLeadTime,
+              resData.availability[key].overflowThreshold,
+              resData.availability[key].overflowInterval,
+              resData.availability[key].overflowLeadTime
             ))
           }
         }

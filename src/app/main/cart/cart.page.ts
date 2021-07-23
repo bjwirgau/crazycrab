@@ -63,13 +63,27 @@ export class CartPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.pickupTimesSub = this.calculateAvailablePickupTimes().subscribe();
+    // this.pickupTimesSub = this.calculateAvailablePickupTimes().subscribe();
+
     this.cartSub = this.quoteItemService.quoteItems.subscribe(quoteItems => {
       this.quoteItems = quoteItems;
     });
-    this.locationService.fetchLocations().subscribe(locations => {
-      this.loadedLocations = locations;
-    });
+    // this.locationService.fetchLocations().subscribe(locations => {
+    //   this.loadedLocations = locations;
+    // });
+    this.locationService.fetchLocations().pipe(
+      switchMap(locations => {
+        this.loadedLocations = locations;
+
+        return this.locationService.fetchAvailabilityConfiguration()
+        // return this.calculateAvailablePickupTimes()
+      }),
+      switchMap(availabilityConfiguration => {
+        this.availabilityConfiguration = availabilityConfiguration;
+
+        return this.calculateAvailablePickupTimes();
+      })
+    ).subscribe();
     this.isAccountLoading = true;
     this.accountDetailService.fetchAccountDetails().subscribe(accountDetails => {
       this.loadedAccountDetails = accountDetails;
