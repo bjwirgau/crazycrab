@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountService, LoginResponseData } from './account.service';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController, AlertController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 import { NgForm, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 
@@ -18,7 +18,6 @@ export class AccountPage implements OnInit {
     private accountService: AccountService,
     private router: Router,
     private loadingCtrl: LoadingController,
-    private modalCtrl: ModalController,
     private alertCtrl: AlertController
   ) { }
 

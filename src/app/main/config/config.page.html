@@ -4,9 +4,80 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
+    <!-- <ion-buttons slot="end">
+      <ion-button color="primary" (click)="onSaveConfiguration()">Save</ion-button>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-
+  <form (ngSubmit)="onSubmit()" *ngIf="loadedConfiguration" [formGroup]="ionicForm">
+    <ion-button type="submit" color="success" expand="full" *ngIf="isLoading" disabled>Settings Updated!</ion-button>
+    <ion-button type="submit" color="warning" expand="full" *ngIf="!isLoading">Update Settings</ion-button>
+    <!-- <ion-button type="submit" color="warning" expand="full" *ngIf="isLoading" disabled><ion-spinner name="dots"></ion-spinner></ion-button> -->
+    <ion-item-divider>
+      <ion-label>
+        General Configuration
+      </ion-label>
+    </ion-item-divider>
+    <ion-item>
+      <ion-label position="floating">Archive Orders After (hours)</ion-label>
+      <ion-input name="archiveOrderPeriod" type="number" formControlName="archiveOrderPeriod"></ion-input>
+    </ion-item>
+    <ion-item-divider>
+      <ion-label>
+        Store Availability
+      </ion-label>
+    </ion-item-divider>
+    <ion-item>
+      <ion-label position="floating">Enable Store Availability</ion-label>
+      <ion-select name="enabled" interface="popover" formControlName="enabled" [compareWith]="compareWith">
+        <ion-select-option value="1">Yes</ion-select-option>
+        <ion-select-option value="0">No</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Base Lead Time (minutes)</ion-label>
+      <ion-input name="baseLeadTime" type="number" formControlName="baseLeadTime"></ion-input>
+      <div class="note">Minimum expected time that the order will be ready.</div>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Availability Interval (minutes)</ion-label>
+      <ion-input name="availabilityInterval" type="number" formControlName="availabilityInterval"></ion-input>
+      <div class="note">Time intervals displayed to the customer of when they want to pick up</div>
+    </ion-item>
+    <ion-item-divider>
+      <ion-label>
+        Overflow Configuration
+      </ion-label>
+    </ion-item-divider>
+    <ion-item>
+      <ion-label position="floating">Overflow Threshold</ion-label>
+      <ion-input name="overflowThreshold" type="number" formControlName="overflowThreshold"></ion-input>
+      <div class="note">Number of orders that will trigger adding the overflow time. This will occur for each multiple of the configured value.</div>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Overflow Interval</ion-label>
+      <ion-input name="overflowInterval" type="number" formControlName="overflowInterval"></ion-input>
+      <div class="note">Additional time added to the configured availability interval</div>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Overflow Lead Time</ion-label>
+      <ion-input name="overflowLeadTime" type="number" formControlName="overflowLeadTime"></ion-input>
+      <div class="note">Additional time added to the configureed base lead time.</div>
+    </ion-item>
+    <ion-item-divider>
+      <ion-label>
+        Lunch Availability
+      </ion-label>
+    </ion-item-divider>
+    <ion-item>
+      <ion-label position="floating">Start Lunch</ion-label>
+      <ion-datetime name="lunchStart" formControlName="lunchStart" displayFormat="h:mm a" value="2021-07-23T04:00:00.000Z"></ion-datetime>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Start Lunch</ion-label>
+      <ion-datetime name="lunchEnd" formControlName="lunchEnd" displayFormat="h:mm a"></ion-datetime>
+    </ion-item>
+  </form>
 </ion-content>

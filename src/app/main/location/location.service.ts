@@ -6,7 +6,7 @@ import { StoreLocation } from './location.model';
 import { BehaviorSubject, NEVER, of } from 'rxjs';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AccountService } from '../account/account.service';
-import { AvailabilityConfiguration } from '../configuration/availability.model';
+import { AvailabilityConfiguration } from '../config/availability.model';
 import { Router } from '@angular/router';
 
 interface StoreLocationData {

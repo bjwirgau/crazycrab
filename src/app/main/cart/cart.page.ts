@@ -14,7 +14,7 @@ import { LocationService } from '../location/location.service';
 import { StoreLocation } from '../location/location.model';
 import { AccountdetailsService } from '../account/accountdetails/accountdetails.service';
 import { AccountDetails } from '../account/accountdetails/accountdetails.model';
-import { AvailabilityConfiguration } from '../configuration/availability.model';
+import { AvailabilityConfiguration } from '../config/availability.model';
 import { OrderService } from './order.service';
 import { map, switchMap } from 'rxjs/operators';
 import { TaxRate } from './taxrate.model';
