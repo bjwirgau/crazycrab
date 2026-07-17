@@ -35,3 +35,4 @@ config.xml
 /android
 /.gradle
 sendgrid.env
+/.angular
