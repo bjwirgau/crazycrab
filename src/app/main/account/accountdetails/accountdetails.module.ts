@@ -10,13 +10,12 @@ import { AccountdetailsPage } from './accountdetails.page';
 import { OrderdetailsComponent } from './orderdetails/orderdetails.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    AccountdetailsPageRoutingModule
-  ],
-  declarations: [AccountdetailsPage, OrderdetailsComponent],
-  entryComponents: [OrderdetailsComponent]
+    imports: [
+        CommonModule,
+        FormsModule,
+        IonicModule,
+        AccountdetailsPageRoutingModule
+    ],
+    declarations: [AccountdetailsPage, OrderdetailsComponent]
 })
 export class AccountdetailsPageModule {}

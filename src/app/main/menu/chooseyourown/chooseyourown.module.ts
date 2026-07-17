@@ -10,13 +10,12 @@ import { ChooseyourownPage } from './chooseyourown.page';
 import { ValidationComponent } from './validation/validation.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ChooseyourownPageRoutingModule
-  ],
-  declarations: [ChooseyourownPage, ValidationComponent],
-  entryComponents: [ValidationComponent]
+    imports: [
+        CommonModule,
+        FormsModule,
+        IonicModule,
+        ChooseyourownPageRoutingModule
+    ],
+    declarations: [ChooseyourownPage, ValidationComponent]
 })
 export class ChooseyourownPageModule {}

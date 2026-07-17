@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService, LoginResponseData } from './account.service';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, AlertController } from '@ionic/angular';
-import { NgForm, FormGroup } from '@angular/forms';
+import { NgForm, UntypedFormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 })
 export class AccountPage implements OnInit {
   isLoading = false;
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   constructor(
     private accountService: AccountService,
