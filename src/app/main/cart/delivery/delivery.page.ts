@@ -29,7 +29,7 @@ export class DeliveryPage implements OnInit {
     this.selectedMethod = event.detail['value'];
   }
 
-  saveDeliveryMethod(event: CustomEvent){
+  saveDeliveryMethod(){
     this.deliveryService.saveDeliveryMethod(this.selectedMethod);
     this.router.navigateByUrl('/main/tabs/cart/payment');
   }
